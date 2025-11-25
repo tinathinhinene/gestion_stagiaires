@@ -9,6 +9,7 @@ import com.gestion.repository.StageRepository;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+
 import java.util.List;
 
 @Service
@@ -24,22 +25,20 @@ public class StageService {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         return (Utilisateur) auth.getPrincipal();
     }
+
     // ============================================================
     // GET ALL
     // ============================================================
     public List<Stage> getAll() {
-        Utilisateur utilisateur = getCurrentUser();
+        Utilisateur u = getCurrentUser();
 
-        // ADMIN → voit tout
-        if (utilisateur.getRole() == RoleUtilisateur.admin) {
+        if (u.getRole() == RoleUtilisateur.admin) {
             return repo.findAll();
         }
 
-        // FORMATEUR → ne voit que ses stages
-        if (utilisateur.getRole() == RoleUtilisateur.formateur) {
-            return repo.findByStagiaire_Formateur_Id(
-                    utilisateur.getFormateur().getId()
-            );
+        if (u.getRole() == RoleUtilisateur.formateur) {
+            Integer formateurId = u.getFormateur().getId();
+            return repo.findByStagiaire_Formateur_Id(formateurId);  // ✔ correct
         }
 
         throw new RessourceAccessDeniedException("Accès refusé");
@@ -49,28 +48,26 @@ public class StageService {
     // GET by ID
     // ============================================================
     public Stage getById(Integer id) {
-        Utilisateur utilisateur = getCurrentUser();
+        Utilisateur u = getCurrentUser();
 
         Stage stage = repo.findById(id)
                 .orElseThrow(() -> new RessourceAccessDeniedException("Stage introuvable"));
 
-        // ADMIN → OK
-        if (utilisateur.getRole() == RoleUtilisateur.admin) {
+        if (u.getRole() == RoleUtilisateur.admin) {
             return stage;
         }
 
-        // FORMATEUR → doit appartenir au formateur
-        if (utilisateur.getRole() == RoleUtilisateur.formateur) {
+        if (u.getRole() == RoleUtilisateur.formateur) {
+            Integer formateurId = u.getFormateur().getId();
 
             if (stage.getStagiaire() != null &&
                 stage.getStagiaire().getFormateur() != null &&
-                stage.getStagiaire().getFormateur().getId()
-                        .equals(utilisateur.getFormateur().getId())) {
+                stage.getStagiaire().getFormateur().getId().equals(formateurId)) {
 
                 return stage;
             }
 
-            throw new RessourceAccessDeniedException("Vous n'avez pas accès à ce stage");
+            throw new RessourceAccessDeniedException("Accès refusé à ce stage");
         }
 
         throw new RessourceAccessDeniedException("Accès refusé");
@@ -80,25 +77,20 @@ public class StageService {
     // CREATE
     // ============================================================
     public Stage save(Stage s) {
-        Utilisateur utilisateur = getCurrentUser();
+        Utilisateur u = getCurrentUser();
 
-        // ADMIN → OK
-        if (utilisateur.getRole() == RoleUtilisateur.admin) {
+        if (u.getRole() == RoleUtilisateur.admin) {
             return repo.save(s);
         }
 
-        // FORMATEUR
-        if (utilisateur.getRole() == RoleUtilisateur.formateur) {
+        if (u.getRole() == RoleUtilisateur.formateur) {
+            Integer formateurId = u.getFormateur().getId();
 
-            // Vérifier que le stagiaire appartient à ce formateur
             if (s.getStagiaire() == null ||
                 s.getStagiaire().getFormateur() == null ||
-                !s.getStagiaire().getFormateur().getId()
-                        .equals(utilisateur.getFormateur().getId())) {
+                !s.getStagiaire().getFormateur().getId().equals(formateurId)) {
 
-                throw new RessourceAccessDeniedException(
-                        "Ce stagiaire n'appartient pas à ce formateur"
-                );
+                throw new RessourceAccessDeniedException("Ce stagiaire ne vous appartient pas");
             }
 
             return repo.save(s);
@@ -111,24 +103,20 @@ public class StageService {
     // UPDATE
     // ============================================================
     public Stage update(Integer id, Stage newStage) {
-        Utilisateur utilisateur = getCurrentUser();
+        Utilisateur u = getCurrentUser();
 
         Stage old = repo.findById(id)
                 .orElseThrow(() -> new RessourceAccessDeniedException("Stage introuvable"));
 
-        // ADMIN → OK
-        if (utilisateur.getRole() == RoleUtilisateur.admin) {
+        if (u.getRole() == RoleUtilisateur.admin) {
             newStage.setId(id);
             return repo.save(newStage);
         }
 
-        // FORMATEUR
-        if (utilisateur.getRole() == RoleUtilisateur.formateur) {
+        if (u.getRole() == RoleUtilisateur.formateur) {
+            Integer formateurId = u.getFormateur().getId();
 
-            // Vérifier qu'il s'agit de SON stage
-            if (old.getStagiaire().getFormateur().getId()
-                    .equals(utilisateur.getFormateur().getId())) {
-
+            if (old.getStagiaire().getFormateur().getId().equals(formateurId)) {
                 newStage.setId(id);
                 return repo.save(newStage);
             }
@@ -139,40 +127,37 @@ public class StageService {
         throw new RessourceAccessDeniedException("Accès refusé");
     }
 
- // ============================================================
- // DELETE
- // ============================================================
- public void delete(Integer id) {
-     Utilisateur utilisateur = getCurrentUser();
+    // ============================================================
+    // DELETE
+    // ============================================================
+    public void delete(Integer id) {
+        Utilisateur u = getCurrentUser();
 
-     Stage stage = repo.findById(id)
-             .orElse(null);
+        Stage stage = repo.findById(id).orElse(null);
+        if (stage == null) return;
 
-     if (stage == null) return;
+        if (u.getRole() == RoleUtilisateur.admin) {
+            repo.deleteById(id);
+            return;
+        }
 
-     // ADMIN → peut supprimer tout
-     if (utilisateur.getRole() == RoleUtilisateur.admin) {
-         repo.deleteById(id);
-         return;
-     }
+        if (u.getRole() == RoleUtilisateur.formateur) {
 
-     // FORMATEUR → peut supprimer uniquement ses stages
-     if (utilisateur.getRole() == RoleUtilisateur.formateur) {
+            Integer formateurId = u.getFormateur().getId();
 
-         // Important : vérifier que le stagiaire appartient au formateur connecté
-         if (stage.getStagiaire() != null &&
-             stage.getStagiaire().getFormateur() != null &&
-             stage.getStagiaire().getFormateur().getId()
-                 .equals(utilisateur.getFormateur().getId())) {
+            boolean autorise =
+                    stage.getStagiaire() != null &&
+                    stage.getStagiaire().getFormateur() != null &&
+                    stage.getStagiaire().getFormateur().getId().equals(formateurId);
 
-             repo.deleteById(id);
-             return;
-         }
+            if (autorise) {
+                repo.deleteById(id);
+                return;
+            }
 
-         throw new RessourceAccessDeniedException("Vous ne pouvez pas supprimer ce stage");
-     }
+            throw new RessourceAccessDeniedException("Vous ne pouvez pas supprimer ce stage");
+        }
 
-     // AUTRES ROLES → interdit
-     throw new RessourceAccessDeniedException("Accès refusé");
- }
+        throw new RessourceAccessDeniedException("Accès refusé");
+    }
 }
