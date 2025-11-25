@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="UTF-8">
+<title>Nouveau stagiaire</title>
+</head>
+<body>
+<h1>Ajouter un stagiaire</h1>
+<form th:action="@{/stagiaire}" th:object="${stagiaire}" method="post">  <!-- on indique a thymlif quand on clique sur envoyer les données doivent etre envoyé a url /stagiaires -->
+Nom : <input type="text" th:field="*{nom}" /><br>
+Prénom : <input type="text" th:field="*{prenom}" /><br>
+Email : <input type="text" th:field="*{email}" /><br>
+<button type="submit">Enregistrer</button>
+</form>
+</body>
+</html>

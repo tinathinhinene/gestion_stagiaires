@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">   <!-- avec  sa on dit au navigateur ou a spring qu'ont va utiliser les balise tymlif th: -->
+<head>
+<meta charset="UTF-8">
+<title>Liste des stagiaires</title>
+</head>
+<body>
+<a th:href="@{/stagiaires/new}">➕ ajouter stagiaire</a>    <!-- je genere un lien vers url -->
+<table border="1">
+<thead>
+<tr>
+<th>ID</th>
+<th>Nom</th>
+<th>Prénom</th>
+<th>Email</th>
+<th>Action</th>
+</tr>
+</thead>
+<tbody>
+<tr th:each="s : ${stagiaires}">  <!-- boucle thymlif pour chaque element de la liste stagiaires que le controller a envoyé je crée une ligne et je la met dans la variable s -->
+<td th:text="${s.id}"></td>
+<td th:text="${s.nom}"></td>
+<td th:text="${s.prenom}"></td>
+<td th:text="${s.email}"></td>
+<td><a th:href="@{/stagiaires/delete/{id}(id=${s.id})}">supprimer</a></td>
+</tr>
+</tbody>
+</table>
+</body>
+</html>

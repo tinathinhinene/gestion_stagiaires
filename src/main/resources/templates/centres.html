@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="UTF-8">
+<title>Liste des centres</title>
+</head>
+<body>
+<h1>Liste des centres</h1>
+<a th:href="@{/centres/new}">➕ ajouter centre</a>  
+<table border="1">
+<thead>
+<tr>
+<th>ID</th>
+<th>Nom</th>
+<th>Prénom</th>
+<th>Email</th>
+<th>Action</th>
+</tr>
+</thead>
+<tbody>
+<tr th:each="c : ${centres}">  
+<td th:text="${c.id}"></td>
+<td th:text="${c.nom}"></td>
+<td th:text="${c.prenom}"></td>
+<td th:text="${c.email}"></td>
+<td><a th:href="@{/centres/delete/{id}(id=${c.id})}">supprimer</a></td>
+</tr>
+</tbody>
+</table>
+</body>
+</html>

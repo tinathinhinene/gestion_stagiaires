@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="UTF-8">
+<title>Nouveau centre</title>
+</head>
+
+<body>
+<h1>Ajouter un centre</h1>
+<form th:action="@{/centre}" th:object="${centre}" method="post">  
+Nom : <input type="text" th:field="*{nom}" /><br>
+ adresse : <label>Adresse :</label> <input type="text" th:field="*{adresse}"/><br>
+ ville : <label>Ville :</label> <input type="text" th:field="*{ville}"/><br>
+ code postal : <label>Code postal :</label> <input type="text" th:field="*{codePostal}"/><br>
+ <button type="submit">Enregistrer</button>
+</form>
+</body>
+</html>
+
+
