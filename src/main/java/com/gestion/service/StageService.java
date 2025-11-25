@@ -139,45 +139,40 @@ public class StageService {
         throw new RessourceAccessDeniedException("Accès refusé");
     }
 
-    // ============================================================
-    // DELETE
-    // ============================================================
  // ============================================================
  // DELETE
  // ============================================================
  public void delete(Integer id) {
      Utilisateur utilisateur = getCurrentUser();
 
-     // Vérifier si le stage existe
      Stage stage = repo.findById(id)
-             .orElseThrow(() -> new RessourceAccessDeniedException("Stage introuvable"));
+             .orElse(null);
 
-     // ADMIN → supprime tout
+     if (stage == null) return;
+
+     // ADMIN → peut supprimer tout
      if (utilisateur.getRole() == RoleUtilisateur.admin) {
-         repo.delete(stage);
+         repo.deleteById(id);
          return;
      }
 
-     // FORMATEUR
+     // FORMATEUR → peut supprimer uniquement ses stages
      if (utilisateur.getRole() == RoleUtilisateur.formateur) {
 
-         // ⚠ Vérifier qu'il a un stagiaire
-         if (stage.getStagiaire() == null || stage.getStagiaire().getFormateur() == null) {
-             throw new RessourceAccessDeniedException("Ce stage n'a aucun formateur associé");
-         }
+         // Important : vérifier que le stagiaire appartient au formateur connecté
+         if (stage.getStagiaire() != null &&
+             stage.getStagiaire().getFormateur() != null &&
+             stage.getStagiaire().getFormateur().getId()
+                 .equals(utilisateur.getFormateur().getId())) {
 
-         Integer idFormateurDuStage = stage.getStagiaire().getFormateur().getId();
-         Integer idFormateurConnecte = utilisateur.getFormateur().getId();
-
-         // Le stage appartient bien au formateur connecté ?
-         if (idFormateurDuStage.equals(idFormateurConnecte)) {
-             repo.delete(stage);
+             repo.deleteById(id);
              return;
          }
 
          throw new RessourceAccessDeniedException("Vous ne pouvez pas supprimer ce stage");
      }
 
+     // AUTRES ROLES → interdit
      throw new RessourceAccessDeniedException("Accès refusé");
  }
 }
