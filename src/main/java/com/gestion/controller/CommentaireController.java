@@ -36,13 +36,7 @@ public class CommentaireController {
         return "commentaire_form";
     }
 
-    @PostMapping
-    public String save(@ModelAttribute ("Commentaire") Commentaire commentaire) {
-        service.save(commentaire);
-        return "redirect:/commentaires";
-    }
-
-    @GetMapping("/delete/{id}")
+     @GetMapping("/delete/{id}")
     public String delete(@PathVariable Integer id) {
         service.delete(id);
         return "redirect:/commentaires";

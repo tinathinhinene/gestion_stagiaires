@@ -96,6 +96,7 @@ public List<Classe> getClasses() {
 public void setClasses(List<Classe> classes) {
 	this.classes = classes;
 }
+
 @Override
 public String toString() {
 	return "Centre [id=" + id + ", nom=" + nom + ", adresse=" + adresse + ", ville=" + ville + ", codePostal="
