@@ -1,6 +1,7 @@
 package com.gestion.controller;
 
 import java.util.List;
+
 import org.springframework.web.bind.annotation.*;
 
 import com.gestion.entity.Utilisateur;
@@ -9,7 +10,6 @@ import com.gestion.service.UtilisateurService;
 @RestController
 @RequestMapping("/api/utilisateurs")
 @CrossOrigin(origins = "http://localhost:5173")
-
 public class UtilisateurRestController {
 
     private final UtilisateurService service;
@@ -28,20 +28,14 @@ public class UtilisateurRestController {
         return service.getById(id);
     }
 
-    @PostMapping
+    @PostMapping("/create")
     public Utilisateur create(@RequestBody Utilisateur u) {
-        return service.save(u);
+        return service.create(u);
     }
 
-    @PostMapping("/bulk")
-    public List<Utilisateur> createAll(@RequestBody List<Utilisateur> utilisateurs) {
-        return service.saveAll(utilisateurs);
-    }
-    
     @PutMapping("/{id}")
     public Utilisateur update(@PathVariable Integer id, @RequestBody Utilisateur u) {
-        u.setId(id);
-        return service.save(u);
+        return service.update(id, u);
     }
 
     @DeleteMapping("/{id}")

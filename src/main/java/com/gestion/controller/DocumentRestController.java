@@ -3,13 +3,13 @@ package com.gestion.controller;
 import java.util.List;
 import org.springframework.web.bind.annotation.*;
 
+import com.gestion.dto.DocumentRequest;
 import com.gestion.entity.Document;
 import com.gestion.service.DocumentService;
 
 @RestController
 @RequestMapping("/api/documents")
 @CrossOrigin(origins = "http://localhost:5173")
-
 public class DocumentRestController {
 
     private final DocumentService service;
@@ -28,25 +28,14 @@ public class DocumentRestController {
         return service.getById(id);
     }
 
-    @PutMapping("/update/{id}")
-    public Document update(@PathVariable Integer id, @RequestBody Document d) {
-        d.setId(id);
-        return service.save(d);
-    }
-    
     @PostMapping("/create")
-    public Document create(@RequestBody Document d) {
-        return service.save(d);
+    public Document create(@RequestBody DocumentRequest req) {
+        return service.create(req);
     }
 
-    @PostMapping("/bulk")
-    public List<Document> createAll(@RequestBody List<Document> documents) {
-        return service.saveAll(documents);
-    }
-
-    @PostMapping
-    public Document save(@RequestBody Document d) {
-        return service.save(d);
+    @PutMapping("/{id}")
+    public Document update(@PathVariable Integer id, @RequestBody DocumentRequest req) {
+        return service.update(id, req);
     }
 
     @DeleteMapping("/{id}")
@@ -54,22 +43,3 @@ public class DocumentRestController {
         service.delete(id);
     }
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

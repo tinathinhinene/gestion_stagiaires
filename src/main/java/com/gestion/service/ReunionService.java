@@ -12,151 +12,147 @@ import com.gestion.entity.Stagiaire;
 import com.gestion.entity.Utilisateur;
 import com.gestion.exception.RessourceAccessDeniedException;
 import com.gestion.repository.ReunionRepository;
+import com.gestion.repository.StagiaireRepository;
 
 @Service
 public class ReunionService {
 
     private final ReunionRepository repo;
+    private final StagiaireRepository stagiaireRepo;
 
-    public ReunionService(ReunionRepository repo) {
+    public ReunionService(ReunionRepository repo, StagiaireRepository stagiaireRepo) {
         this.repo = repo;
+        this.stagiaireRepo = stagiaireRepo;
     }
 
-    // Récupère l'utilisateur connecté
     private Utilisateur getCurrentUser() {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         return (Utilisateur) auth.getPrincipal();
     }
 
-    // LIRE TOUTES LES RÉUNIONS
+    // ============================================================
+    // GET ALL
+    // ============================================================
     public List<Reunion> getAll() {
+        Utilisateur u = getCurrentUser();
 
-        Utilisateur utilisateur = getCurrentUser();
-
-        if (utilisateur.getRole() == RoleUtilisateur.admin) {
+        if (u.getRole() == RoleUtilisateur.admin) {
             return repo.findAll();
         }
 
-        if (utilisateur.getRole() == RoleUtilisateur.formateur) {
-            return repo.findByFormateurId(utilisateur.getFormateur().getId());
+        if (u.getRole() == RoleUtilisateur.formateur) {
+            return repo.findByStagiaire_Formateur_Id(u.getFormateur().getId());
         }
 
-        return List.of();
+        throw new RessourceAccessDeniedException("Accès refusé");
     }
 
-    // LIRE UNE RÉUNION PAR ID
+    // ============================================================
+    // GET BY ID
+    // ============================================================
     public Reunion getById(Integer id) {
-
-        Utilisateur utilisateur = getCurrentUser();
+        Utilisateur u = getCurrentUser();
 
         Reunion r = repo.findById(id).orElse(null);
         if (r == null) return null;
 
-        if (utilisateur.getRole() == RoleUtilisateur.admin) {
+        if (u.getRole() == RoleUtilisateur.admin) return r;
+
+        if (u.getRole() == RoleUtilisateur.formateur &&
+            r.getStagiaire().getFormateur().getId().equals(u.getFormateur().getId())) {
             return r;
         }
 
-        if (utilisateur.getRole() == RoleUtilisateur.formateur) {
-            if (r.getFormateur() != null &&
-                r.getFormateur().getId().equals(utilisateur.getFormateur().getId())) {
-
-                return r;
-            }
-            throw new RessourceAccessDeniedException("Vous n'avez pas accès à cette réunion");
-        }
-
-        throw new RessourceAccessDeniedException("Accès refusé");
+        throw new RessourceAccessDeniedException("Accès interdit");
     }
 
-    // CRÉER / MODIFIER UNE RÉUNION
+    // ============================================================
+    // SAVE (création ou modification, comme pour Projet)
+    // ============================================================
     public Reunion save(Reunion r) {
 
-        Utilisateur utilisateur = getCurrentUser();
-
-        if (utilisateur.getRole() == RoleUtilisateur.admin) {
-            return repo.save(r);
+        if (r.getId() == null) {
+            // création
+            return create(r);
+        } else {
+            // modification
+            return update(r.getId(), r);
         }
-
-        if (utilisateur.getRole() == RoleUtilisateur.formateur) {
-
-            // On force ce formateur comme propriétaire
-            r.setFormateur(utilisateur.getFormateur());
-
-            Reunion existante = null;
-            if (r.getId() != null) {
-                existante = repo.findById(r.getId()).orElse(null);
-            }
-
-            // Empêcher la modification d'une réunion d'un autre formateur
-            if (existante != null &&
-                existante.getFormateur() != null &&
-                !existante.getFormateur().getId().equals(utilisateur.getFormateur().getId())) {
-
-                throw new RessourceAccessDeniedException("Vous ne pouvez pas modifier cette réunion");
-            }
-
-            return repo.save(r);
-        }
-
-        throw new RessourceAccessDeniedException("Accès refusé");
     }
 
-    // SUPPRIMER
+    // ============================================================
+    // CREATE
+    // ============================================================
+    public Reunion create(Reunion r) {
+
+        Utilisateur u = getCurrentUser();
+
+        if (r.getStagiaire() == null || r.getStagiaire().getId() == null) {
+            throw new RessourceAccessDeniedException("Stagiaire obligatoire");
+        }
+
+        Stagiaire stg = stagiaireRepo.findById(r.getStagiaire().getId())
+                    .orElseThrow(() -> new RessourceAccessDeniedException("Stagiaire introuvable"));
+
+        if (u.getRole() == RoleUtilisateur.formateur &&
+            !stg.getFormateur().getId().equals(u.getFormateur().getId())) {
+
+            throw new RessourceAccessDeniedException("Vous ne pouvez créer une réunion que pour vos stagiaires");
+        }
+
+        r.setStagiaire(stg);
+        r.setFormateur(stg.getFormateur()); // cohérence
+        // projet : tu peux le laisser tel quel, tu l'as déjà mis dans le formulaire
+
+        return repo.save(r);
+    }
+
+    // ============================================================
+    // UPDATE
+    // ============================================================
+    public Reunion update(Integer id, Reunion r) {
+
+        Utilisateur u = getCurrentUser();
+
+        Reunion existante = repo.findById(id)
+                .orElseThrow(() -> new RessourceAccessDeniedException("Réunion introuvable"));
+
+        if (u.getRole() == RoleUtilisateur.formateur &&
+            !existante.getStagiaire().getFormateur().getId()
+                .equals(u.getFormateur().getId())) {
+            throw new RessourceAccessDeniedException("Vous ne pouvez pas modifier cette réunion");
+        }
+
+        existante.setDate(r.getDate());
+        existante.setDuree(r.getDuree());
+        existante.setObjet(r.getObjet());
+        existante.setDescription(r.getDescription());
+        existante.setType(r.getType());
+        existante.setActions(r.getActions());
+        existante.setEtat(r.getEtat());
+        existante.setProjet(r.getProjet()); // si tu veux pouvoir changer le projet aussi
+
+        return repo.save(existante);
+    }
+
+    // ============================================================
+    // DELETE
+    // ============================================================
     public void delete(Integer id) {
 
-        Utilisateur utilisateur = getCurrentUser();
+        Utilisateur u = getCurrentUser();
 
-        Reunion r = repo.findById(id).orElse(null);
-        if (r == null) return;
+        Reunion r = repo.findById(id)
+                .orElseThrow(() -> new RessourceAccessDeniedException("Réunion introuvable"));
 
-        if (utilisateur.getRole() == RoleUtilisateur.admin) {
+        if (u.getRole() == RoleUtilisateur.admin ||
+           (u.getRole() == RoleUtilisateur.formateur &&
+            r.getStagiaire().getFormateur().getId().equals(u.getFormateur().getId()))) {
+
             repo.deleteById(id);
             return;
         }
 
-        if (utilisateur.getRole() == RoleUtilisateur.formateur) {
-            if (r.getFormateur() != null &&
-                r.getFormateur().getId().equals(utilisateur.getFormateur().getId())) {
-
-                repo.deleteById(id);
-                return;
-            }
-            throw new RessourceAccessDeniedException("Vous ne pouvez pas supprimer cette réunion");
-        }
-
-        throw new RessourceAccessDeniedException("Accès refusé");
+        throw new RessourceAccessDeniedException("Vous ne pouvez pas supprimer cette réunion");
     }
-
-
-	public List<Reunion> saveAll(List<Reunion> reunions) {
-	    Utilisateur utilisateur = getCurrentUser();
-
-    if (utilisateur.getRole() == RoleUtilisateur.admin) {
-        return repo.saveAll(reunions);
-    }
-
-    if (utilisateur.getRole() == RoleUtilisateur.formateur) {
-        // On force le formateur pour CHAQUE reunion
-        for (Reunion r : reunions) {
-            r.setFormateur(utilisateur.getFormateur());
-        }
-
-        return repo.saveAll(reunions);
-    }
-
-    throw new RessourceAccessDeniedException("Accès refusé");
 }
-}
-
-
-
-
-
-
-
-
-
-
-
-
-

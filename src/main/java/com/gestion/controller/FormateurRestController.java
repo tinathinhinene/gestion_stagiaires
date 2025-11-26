@@ -9,7 +9,6 @@ import com.gestion.service.FormateurService;
 @RestController
 @RequestMapping("/api/formateurs")
 @CrossOrigin(origins = "http://localhost:5173")
-
 public class FormateurRestController {
 
     private final FormateurService service;
@@ -28,20 +27,14 @@ public class FormateurRestController {
         return service.getById(id);
     }
 
-    @PostMapping
+    @PostMapping("/create")
     public Formateur create(@RequestBody Formateur f) {
         return service.save(f);
     }
-    
-    @PostMapping("/bulk")
-    public List<Formateur> createAll(@RequestBody List<Formateur> formateurs) {
-        return service.saveAll(formateurs);
-    }
-    
+
     @PutMapping("/{id}")
     public Formateur update(@PathVariable Integer id, @RequestBody Formateur f) {
-        f.setId(id);
-        return service.save(f);
+        return service.update(id, f);
     }
 
     @DeleteMapping("/{id}")

@@ -1,11 +1,11 @@
 package com.gestion.repository;
 
-import com.gestion.entity.Reunion;
-
 import java.util.List;
-
 import org.springframework.data.jpa.repository.JpaRepository;
 
+import com.gestion.entity.Reunion;
+
 public interface ReunionRepository extends JpaRepository<Reunion, Integer> {
-    List<Reunion> findByFormateurId(Integer formateurId);
+
+    List<Reunion> findByStagiaire_Formateur_Id(Integer formateurId);
 }

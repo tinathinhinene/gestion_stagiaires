@@ -51,11 +51,6 @@ public class UtilisateurController {
         return "utilisateur_form";
     }
 
-    @PostMapping
-    public String save(@ModelAttribute Utilisateur utilisateur) {
-        service.save(utilisateur);
-        return "redirect:/utilisateurs";
-    }
 
     @GetMapping("/delete/{id}")
     public String delete(@PathVariable Integer id) {

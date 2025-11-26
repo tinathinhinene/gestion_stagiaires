@@ -4,6 +4,9 @@ import com.gestion.entity.Reunion;
 import com.gestion.entity.TypeReunion;
 import com.gestion.entity.EtatReunion;
 import com.gestion.service.ReunionService;
+import com.gestion.service.StagiaireService;
+import com.gestion.service.ProjetService;
+
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -12,55 +15,86 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/reunions")
 public class ReunionController {
 
-//=============================================================================
-    //attributs
-//=============================================================================
-	
-    private final ReunionService service;
+    private final ReunionService reunionService;
+    private final StagiaireService stagiaireService;
+    private final ProjetService projetService;
 
-  //=============================================================================
-    //constructeurs
-//=============================================================================
-    
-    public ReunionController(ReunionService service) {
-        this.service = service;
+    // ============================================================
+    // CONSTRUCTEUR
+    // ============================================================
+    public ReunionController(ReunionService reunionService, 
+                             StagiaireService stagiaireService,
+                             ProjetService projetService) {
+        this.reunionService = reunionService;
+        this.stagiaireService = stagiaireService;
+        this.projetService = projetService;
     }
 
+    // ============================================================
+    // LISTE
+    // ============================================================
     @GetMapping
     public String list(Model model) {
-        model.addAttribute("reunions", service.getAll());
+        model.addAttribute("reunions", reunionService.getAll());
         return "reunions";
     }
 
+    // ============================================================
+    // FORMULAIRE CREATION
+    // ============================================================
     @GetMapping("/new")
     public String form(Model model) {
+
         model.addAttribute("reunion", new Reunion());
         model.addAttribute("types", TypeReunion.values());
         model.addAttribute("etats", EtatReunion.values());
+
+        // ✔ liste des stagiaires autorisés selon rôle
+        model.addAttribute("stagiaires", stagiaireService.getAll());
+
+        // ✔ liste des projets liés à leurs stagiaires
+        model.addAttribute("projets", projetService.getAll());
+
         return "reunion_form";
     }
 
+    // ============================================================
+    // SAUVEGARDE
+    // ============================================================
     @PostMapping
     public String save(@ModelAttribute Reunion reunion) {
-        service.save(reunion);
+
+        reunionService.save(reunion);
         return "redirect:/reunions";
     }
 
+    // ============================================================
+    // FORMULAIRE EDITION
+    // ============================================================
     @GetMapping("/edit/{id}")
     public String edit(@PathVariable Integer id, Model model) {
-        Reunion r = service.getById(id);
-        if (r != null) {
-            model.addAttribute("reunion", r);
-            model.addAttribute("types", TypeReunion.values());
-            model.addAttribute("etats", EtatReunion.values());
-            return "reunion_form";
+        Reunion r = reunionService.getById(id);
+
+        if (r == null) {
+            return "redirect:/reunions";
         }
-        return "redirect:/reunions";
+
+        model.addAttribute("reunion", r);
+        model.addAttribute("types", TypeReunion.values());
+        model.addAttribute("etats", EtatReunion.values());
+
+        model.addAttribute("stagiaires", stagiaireService.getAll());
+        model.addAttribute("projets", projetService.getAll());
+
+        return "reunion_form";
     }
 
+    // ============================================================
+    // SUPPRESSION
+    // ============================================================
     @GetMapping("/delete/{id}")
     public String delete(@PathVariable Integer id) {
-        service.delete(id);
+        reunionService.delete(id);
         return "redirect:/reunions";
     }
 }

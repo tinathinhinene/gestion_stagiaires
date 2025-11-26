@@ -1,82 +1,123 @@
 package com.gestion.controller;
 
+import com.gestion.dto.StagiaireInput;
+import com.gestion.entity.Stagiaire;
+import com.gestion.service.ClasseService;
+import com.gestion.service.FormateurService;
+import com.gestion.service.StagiaireService;
+
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
-import com.gestion.entity.Stagiaire;
-import com.gestion.service.StagiaireService;
 
-@Controller                           // controller MVC qui renvoi une vue html
-@RequestMapping("/stagiaires")         // les routes commencent par /stagiaires
-public class StagiaireController {    //je declare ma classe
+@Controller
+@RequestMapping("/stagiaires")
+public class StagiaireController {
 
-//=============================================================================
-	            //attributs
-//	=============================================================================
-	
-private final StagiaireService service;    
+    private final StagiaireService service;
+    private final FormateurService formateurService;
+    private final ClasseService classeService;
 
-//=============================================================================
-                   //constructeurs
-//=============================================================================
+    public StagiaireController(
+            StagiaireService service,
+            FormateurService formateurService,
+            ClasseService classeService
+    ) {
+        this.service = service;
+        this.formateurService = formateurService;
+        this.classeService = classeService;
+    }
 
-public StagiaireController(StagiaireService service) {    //Spring te donne automatiquement un StagiaireService et tu le gardes dans ton contrôleur. injection de dependance
-this.service = service;     //sauvegarde l'objet dans cet attribut
+    // ============================================================
+    // LISTE
+    // ============================================================
+    @GetMapping
+    public String list(Model model) {
+        model.addAttribute("stagiaires", service.getAll());
+        return "stagiaires";
+    }
+
+    // ============================================================
+    // FORM CREATION
+    // ============================================================
+    @GetMapping("/new")
+    public String form(Model model) {
+
+        model.addAttribute("stagiaire", new Stagiaire());
+        model.addAttribute("formateurs", formateurService.getAll());
+        model.addAttribute("classes", classeService.getAll());
+
+        return "stagiaire_form";
+    }
+
+    // ============================================================
+    // FORM EDITION
+    // ============================================================
+    @GetMapping("/edit/{id}")
+    public String edit(@PathVariable Integer id, Model model) {
+
+        Stagiaire s = service.getById(id);
+        if (s == null) return "redirect:/stagiaires";
+
+        model.addAttribute("stagiaire", s);
+        model.addAttribute("formateurs", formateurService.getAll());
+        model.addAttribute("classes", classeService.getAll());
+
+        return "stagiaire_form";
+    }
+
+    // ============================================================
+    // SAVE (CREATE + UPDATE)
+    // ============================================================
+    @PostMapping
+    public String save(@ModelAttribute("stagiaire") Stagiaire stagiaire) {
+
+        // Convertir vers DTO StagiaireInput
+        StagiaireInput dto = new StagiaireInput();
+
+        dto.setNom(stagiaire.getNom());
+        dto.setPrenom(stagiaire.getPrenom());
+        dto.setEmail(stagiaire.getEmail());
+        dto.setTel(stagiaire.getTel());
+        dto.setDateNaiss(stagiaire.getDateNaiss());
+        dto.setActif(stagiaire.getActif());
+
+        // --------------------------
+        // FORMATEUR
+        // --------------------------
+        if (stagiaire.getFormateur() != null && stagiaire.getFormateur().getId() != null) {
+            StagiaireInput.MiniObject f = new StagiaireInput.MiniObject();
+            f.setId(stagiaire.getFormateur().getId());
+            dto.setFormateur(f);
+        }
+
+        // --------------------------
+        // CLASSE
+        // --------------------------
+        if (stagiaire.getClasse() != null && stagiaire.getClasse().getId() != null) {
+            StagiaireInput.MiniObject c = new StagiaireInput.MiniObject();
+            c.setId(stagiaire.getClasse().getId());
+            dto.setClasse(c);
+        }
+
+        // --------------------------
+        // CREATE OR UPDATE
+        // --------------------------
+        if (stagiaire.getId() == null) {
+            service.create(dto);
+        } else {
+            service.update(stagiaire.getId(), dto);
+        }
+
+        return "redirect:/stagiaires";
+    }
+
+    // ============================================================
+    // DELETE
+    // ============================================================
+    @GetMapping("/delete/{id}")
+    public String delete(@PathVariable Integer id) {
+        service.delete(id);
+        return "redirect:/stagiaires";
+    }
 }
-
-
-@GetMapping   // repond à get/stagiaires
-public String list(Model model) {        // ici qu'on met les donnés pour la page
-	model.addAttribute("stagiaires", service.getAll());     //jen envoi la liste a la vu sous nom stagiaires
-	return "stagiaires";   //correspond à template stagiaire.html
-	}
-
-
-@GetMapping("/new")  //repond a get/stagiaires/new
-public String form(Model model) { // affiche un formulaire d'ajout 
-	model.addAttribute("stagiaire", new Stagiaire()); // dans le model en met stagiaire vide thymleaf va l'utiliser pour remplir les champs du formulaire
-	return "stagiaire_form";     // spring affiche la page stagiaire_form.html
-	}
-
-
-@PostMapping //repond a post/stagiaires
-public String save(@ModelAttribute ("stagiaire") Stagiaire stagiaire) {    // spring va prendreles champs du formulaire et les mettre dansun objet java stagiaire
-	service.save(stagiaire); //en enregistre dans bdd
-	return "redirect:/stagiaires"; // après enregistrer en revient à la liste 
-	}
-
-
-@GetMapping("/delete/{id}")    // repond a get/stagiaires/delete/id
-public String delete(@PathVariable Integer id) { //recupere l i d qui es dans l url
-	service.delete(id); //je demande au service de supprimer en bdd
-	return "redirect:/stagiaires"; //reviens a la liste
-	
-}
-
-
-}
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
