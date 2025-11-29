@@ -1,13 +1,11 @@
 import axios from "axios";
 
-// URL de base récupérée depuis .env
 const api = axios.create({
-  baseURL: import.meta.env.VITE_API_URL,
+  baseURL: "http://localhost:8021/api", // <-- HARDCODE TEMPORAIRE POUR TEST
 });
 
-// Interceptor pour ajouter automatiquement le token JWT si présent
 api.interceptors.request.use((config) => {
-  const token = localStorage.getItem("token"); // on stockera le token ici après login
+  const token = localStorage.getItem("token");
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
   }

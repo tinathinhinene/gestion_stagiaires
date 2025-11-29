@@ -22,7 +22,8 @@ function LoginPage() {
       const token = response.data.token;
       localStorage.setItem("token", token);
 
-      navigate("/stagiaires");
+      navigate("/accueil");
+
     } catch (err) {
       console.error(err);
       setError("Identifiants incorrects");
