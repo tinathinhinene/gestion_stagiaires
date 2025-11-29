@@ -13,6 +13,18 @@ function StagiairesPage() {
     localStorage.removeItem("token");
     navigate("/login");
   };
+  const handleDelete = async (id) => {
+  if (!confirm("Voulez-vous vraiment supprimer ce stagiaire ?")) return;
+
+  try {
+    await api.delete(`/stagiaires/${id}`);
+    setStagiaires(stagiaires.filter((s) => s.id !== id));
+  } catch (err) {
+    console.error(err);
+    alert("Erreur lors de la suppression");
+  }
+};
+
 
   // Récupération des stagiaires au chargement
   useEffect(() => {
@@ -37,6 +49,12 @@ function StagiairesPage() {
   return (
     <div style={{ padding: "2rem" }}>
       <h1>Liste des stagiaires</h1>
+<button
+  onClick={() => navigate("/stagiaires/new")}
+  style={{ marginBottom: "1rem" }}
+>
+  Ajouter un stagiaire
+</button>
 
       <button onClick={logout} style={{ marginBottom: "1rem" }}>
         Se déconnecter
@@ -61,29 +79,38 @@ function StagiairesPage() {
               <th>Classe</th>
             </tr>
           </thead>
-          <tbody>
-            {stagiaires.map((s) => (
-              <tr key={s.id}>
-                <td>{s.id}</td>
-                <td>{s.nom}</td>
-                <td>{s.prenom}</td>
-                <td>{s.email}</td>
-                <td>{s.tel}</td>
-                <td>{s.dateNaiss || "—"}</td>
-                <td>{s.actif ? "Oui" : "Non"}</td>
+         <tbody>
+  {stagiaires.map((s) => (
+    <tr key={s.id}>
+      <td>{s.id}</td>
+      <td>{s.nom}</td>
+      <td>{s.prenom}</td>
+      <td>{s.email}</td>
+      <td>{s.tel}</td>
+      <td>{s.dateNaiss || "—"}</td>
+      <td>{s.actif ? "Oui" : "Non"}</td>
+      <td>{s.formateur ? `${s.formateur.nom} ${s.formateur.prenom}` : "—"}</td>
+      <td>{s.classe ? s.classe.nom : "—"}</td>
 
-                {/* Formateur peut être null */}
-                <td>
-                  {s.formateur
-                    ? `${s.formateur.nom} ${s.formateur.prenom}`
-                    : "—"}
-                </td>
+      {/* NOUVELLES ACTIONS CRUD */}
+      <td>
+        <button onClick={() => navigate(`/stagiaires/edit/${s.id}`)}>
+          Modifier
+        </button>
+      </td>
 
-                {/* Classe peut être null */}
-                <td>{s.classe ? s.classe.nom : "—"}</td>
-              </tr>
-            ))}
-          </tbody>
+      <td>
+        <button
+          style={{ color: "red" }}
+          onClick={() => handleDelete(s.id)}
+        >
+          Supprimer
+        </button>
+      </td>
+    </tr>
+  ))}
+</tbody>
+
         </table>
       )}
     </div>
