@@ -7,4 +7,6 @@ import com.gestion.entity.Stagiaire;
 public interface StagiaireRepository extends JpaRepository<Stagiaire, Integer> {
 
     List<Stagiaire> findByFormateur_Id(Integer formateurId);
+    List<Stagiaire> findByNomContainingIgnoreCaseOrPrenomContainingIgnoreCase(String nom, String prenom);
+    
 }

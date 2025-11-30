@@ -1,11 +1,14 @@
 import { useState } from "react";
 import { NavLink, useNavigate } from "react-router-dom";
 import { decodeToken } from "../utils/jwt";
-import logo from "../assets/images/logo.png";   // <-- IMPORT DU LOGO
 import "../styles/accueil.css";
+import logo from "../assets/images/logo.png";
 
 function Navbar() {
   const [open, setOpen] = useState(false);
+  const [searchOpen, setSearchOpen] = useState(false);
+  const [query, setQuery] = useState("");
+
   const navigate = useNavigate();
 
   const payload = decodeToken();
@@ -19,16 +22,31 @@ function Navbar() {
 
   const toggleMenu = () => setOpen((o) => !o);
 
+  // 👉 Fonction qui lance la recherche
+  const launchSearch = () => {
+    const q = query.trim();
+    if (!q) return; // si vide, on ne fait rien
+
+    // On va vers la page /recherche avec le paramètre ?q=
+    navigate(`/recherche?q=${encodeURIComponent(q)}`);
+
+    // on ferme la section détaillée
+    setSearchOpen(false);
+  };
+
   return (
     <header className="nav-header">
       <div className="nav-inner">
-
-        {/* -------- LOGO À GAUCHE -------- */}
+        {/* LOGO */}
         <div className="nav-left">
-          <img src={logo} alt="Logo" className="nav-logo-img" />
+          <img
+            src={logo}
+            alt="DEVISSE - Gestion des stagiaires"
+            className="nav-logo-img"
+          />
         </div>
 
-        {/* -------- MENU DESKTOP -------- */}
+        {/* MENU CENTRE */}
         <nav className="nav-center">
           <NavLink to="/accueil" className="nav-link">
             Tableau de bord
@@ -50,7 +68,30 @@ function Navbar() {
           </NavLink>
         </nav>
 
-        {/* -------- ZONE UTILISATEUR (DESKTOP) -------- */}
+        {/* BARRE DE RECHERCHE (dans la navbar) */}
+        <div className="nav-search">
+          <input
+            type="text"
+            className="nav-search-input"
+            placeholder="Rechercher..."
+            value={query} // 🔹 lié à l'état query
+            onChange={(e) => setQuery(e.target.value)}
+            onClick={() => setSearchOpen(true)}
+            onKeyDown={(e) => {
+              if (e.key === "Enter") {
+                launchSearch();
+              }
+            }}
+          />
+          <img
+            src="https://static.vecteezy.com/ti/vecteur-libre/p1/4897827-loupe-ou-recherche-icone-plat-vecteur-graphique-sur-fond-isole-gratuit-vectoriel.jpg"
+            className="nav-search-icon"
+            alt="Recherche"
+            onClick={() => setSearchOpen(true)}
+          />
+        </div>
+
+        {/* UTILISATEUR */}
         <div className="nav-right">
           <div className="nav-user">
             <div className="nav-avatar">
@@ -68,7 +109,6 @@ function Navbar() {
             Déconnexion
           </button>
 
-          {/* Burger menu (mobile) */}
           <button className="nav-burger" onClick={toggleMenu}>
             <span />
             <span />
@@ -77,7 +117,7 @@ function Navbar() {
         </div>
       </div>
 
-      {/* -------- MENU MOBILE -------- */}
+      {/* MENU MOBILE */}
       {open && (
         <nav className="nav-mobile">
           <NavLink to="/accueil" className="nav-mobile-link" onClick={toggleMenu}>
@@ -103,6 +143,32 @@ function Navbar() {
             Déconnexion
           </button>
         </nav>
+      )}
+
+      {/* SECTION RECHERCHE DÉTAILLÉE */}
+      {searchOpen && (
+        <div className="search-section">
+          <div className="search-content">
+            <h2>Recherche détaillée</h2>
+
+            <input
+              type="text"
+              className="search-input"
+              placeholder="Tapez votre recherche..."
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") {
+                  launchSearch();
+                }
+              }}
+            />
+
+            <button onClick={launchSearch}>
+              Lancer la recherche
+            </button>
+          </div>
+        </div>
       )}
     </header>
   );

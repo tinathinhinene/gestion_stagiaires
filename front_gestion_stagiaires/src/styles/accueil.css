@@ -1,13 +1,19 @@
 /* ============================================================
+   GLOBAL
+   ============================================================ */
+body {
+  margin: 0;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+    sans-serif;
+}
+
+/* ============================================================
    NAVBAR - STYLE FINALE PRO (Desktop + Mobile)
    ============================================================ */
-body{
-    margin: 0;
-}
-.nav-header {
 
-  background: #1193C2; 
-  border-bottom: 1px solid #08465D;
+.nav-header {
+  background: #1193c2; /* ton bleu */
+  border-bottom: 1px solid #08465d;
   width: 100%;
 }
 
@@ -27,11 +33,13 @@ body{
   gap: 12px;
 }
 
+/* ✅ LOGO IMAGE – FORCÉ À LA BONNE TAILLE */
 .nav-logo-img {
-  width: 100px;
-  height: 75px;
+  display: block;
+  width: 120px !important;  /* modifie ici la taille que tu veux */
+  height: auto !important;
   object-fit: contain;
-  
+  flex-shrink: 0;
 }
 
 /* MENU CENTRÉ (DESKTOP) */
@@ -46,21 +54,21 @@ body{
   font-size: 0.95rem;
   font-weight: 500;
   text-decoration: none;
-  color: #204c5e;
+  color: #f5f7fa;
   padding-bottom: 2px;
   border-bottom: 2px solid transparent;
   transition: 0.25s ease;
 }
 
 .nav-link:hover {
-  color: #163642;
-  border-bottom: 2px solid #163642;
+  color: #ffffff;
+  border-bottom: 2px solid #ffffff;
 }
 
 .nav-link.active {
-  color: #163642;
+  color: #ffffff;
   font-weight: 600;
-  border-bottom: 2px solid #163642;
+  border-bottom: 2px solid #ffffff;
 }
 
 /* UTILISATEUR & BOUTON */
@@ -93,6 +101,7 @@ body{
   display: flex;
   flex-direction: column;
   line-height: 1.1;
+  color: #f5f7fa;
 }
 
 .nav-user-name {
@@ -102,7 +111,7 @@ body{
 
 .nav-user-role {
   font-size: 0.75rem;
-  color: #3b6c7e;
+  opacity: 0.9;
 }
 
 .nav-logout-btn {
@@ -132,13 +141,86 @@ body{
 .nav-burger span {
   width: 22px;
   height: 3px;
-  background: #1d3c4a;
+  background: #ffffff;
   border-radius: 3px;
 }
 
 /* MENU MOBILE DÉROULANT */
 .nav-mobile {
   display: none;
+}
+/* ============================================================
+   BARRE DE RECHERCHE NAVBAR
+   ============================================================ */
+
+.nav-search {
+  position: relative;
+  width: 220px;
+  margin-right: 20px;
+}
+
+.nav-search-input {
+  width: 100%;
+  padding: 8px 32px 8px 12px;
+  border-radius: 18px;
+  border: 2px solid #8ecae6;
+  outline: none;
+}
+
+.nav-search-icon {
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  width: 18px;
+  height: 18px;
+  transform: translateY(-50%);
+  cursor: pointer;
+}
+
+/* ============================================================
+   SECTION RECHERCHE DÉTAILLÉE
+   ============================================================ */
+
+.search-section {
+  width: 100%;
+  max-width: 600px;
+  background: white;
+  margin: 15px auto;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+  animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(-8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.search-content {
+  text-align: center;
+}
+
+.search-input {
+  width: 80%;
+  padding: 10px;
+  border-radius: 6px;
+  border: 2px solid #ccc;
+  margin-bottom: 15px;
+  font-size: 16px;
+}
+
+.search-section button {
+  padding: 10px 20px;
+  background: #1193c2;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.search-section button:hover {
+  background: #0b6d90;
 }
 
 /* ============================================================
@@ -163,18 +245,18 @@ body{
     flex-direction: column;
     gap: 0.8rem;
     padding: 1rem 1.2rem;
-    background: #cbe7f4;
-    border-top: 1px solid #a8ceda;
+    background: #1193c2;
+    border-top: 1px solid #08465d;
   }
 
   .nav-mobile-link {
     text-decoration: none;
     font-size: 1rem;
-    color: #204c5e;
+    color: #ffffff;
   }
 
   .nav-mobile-link:hover {
-    color: #163642;
+    color: #e0f1f7;
   }
 
   .nav-mobile-logout {

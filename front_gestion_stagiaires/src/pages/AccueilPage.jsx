@@ -2,7 +2,6 @@ import { useEffect, useState } from "react";
 import api from "../api/axios";
 import { decodeToken } from "../utils/jwt";
 
-import Navbar from "../components/Navbar";
 import StatCard from "../components/StatCard";
 import TimelineBar from "../components/TimelineBar";
 import StagiaireCard from "../components/StagiaireCard";
@@ -44,7 +43,7 @@ function AccueilPage() {
 
   return (
     <div className="accueil-wrapper">
-      <Navbar />
+      {/* ❌ SUPPRESSION DEFINITIVE DU NAVBAR ICI */}
 
       <div className="accueil-container">
         <div className="stats-box">

@@ -8,4 +8,5 @@ public interface ProjetRepository extends JpaRepository<Projet, Integer> {
 
 
     List<Projet> findByStage_Stagiaire_Formateur_Id(Integer formateurId);
+    List<Projet> findByTitreContainingIgnoreCaseOrDescriptionContainingIgnoreCase(String titre, String description);
 }
