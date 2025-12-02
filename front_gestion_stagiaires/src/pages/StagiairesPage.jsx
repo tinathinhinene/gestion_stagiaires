@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import api from "../api/axios";
+import api from "../api/axiosClient";
 import { useNavigate } from "react-router-dom";
 
 function StagiairesPage() {

@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import api from "../api/axios";
+import api from "../api/axiosClient";
 
 function DocumentForm({ mode }) {
   const navigate = useNavigate();

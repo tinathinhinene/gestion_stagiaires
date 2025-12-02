@@ -1,6 +1,6 @@
-import { useEffect, useState } from "react";
-import api from "../api/axios";
-import { decodeToken } from "../utils/jwt";
+import { useEffect, useState, useContext } from "react";
+import api from "../api/axiosClient";
+import { AuthContext } from "../context/AuthContext";
 
 import StatCard from "../components/StatCard";
 import TimelineBar from "../components/TimelineBar";
@@ -9,49 +9,50 @@ import StagiaireCard from "../components/StagiaireCard";
 import "../styles/accueil.css";
 
 function AccueilPage() {
+  const { user } = useContext(AuthContext); // qui est connecté (admin / formateur)
+
   const [role, setRole] = useState(null);
   const [stagiaires, setStagiaires] = useState([]);
   const [stages, setStages] = useState([]);
   const [reunions, setReunions] = useState([]);
 
+  // 🟦 Quand l'utilisateur est connu → on charge les données
   useEffect(() => {
-    const payload = decodeToken();
-    if (!payload) return;
+    if (!user) return;
 
-    setRole(payload.role);
-    loadData(payload);
-  }, []);
+    setRole(user.role);
+    loadData();
+  }, [user]);
 
-  const loadData = async (payload) => {
+  // 🟩 Charge les données SANS se soucier du rôle
+  // 👉 le backend se charge de filtrer en fonction du token
+  const loadData = async () => {
     try {
-      if (payload.role === "admin") {
-        setStagiaires((await api.get("/stagiaires")).data);
-        setStages((await api.get("/stages")).data);
-        setReunions((await api.get("/reunions")).data);
-      }
+      const [resStagiaires, resStages, resReunions] = await Promise.all([
+        api.get("/stagiaires"),
+        api.get("/stages"),
+        api.get("/reunions"),
+      ]);
 
-      if (payload.role === "formateur") {
-        const idFor = payload.formateurId;
-        setStagiaires((await api.get(`/formateurs/${idFor}/stagiaires`)).data);
-        setStages((await api.get(`/formateurs/${idFor}/stages`)).data);
-        setReunions((await api.get(`/formateurs/${idFor}/reunions`)).data);
-      }
+      setStagiaires(resStagiaires.data);
+      setStages(resStages.data);
+      setReunions(resReunions.data);
     } catch (err) {
-      console.error(err);
+      console.error("Erreur lors du chargement des données :", err);
     }
   };
 
   return (
     <div className="accueil-wrapper">
-      {/* ❌ SUPPRESSION DEFINITIVE DU NAVBAR ICI */}
-
       <div className="accueil-container">
+        {/* CARTES DE STATS */}
         <div className="stats-box">
           <StatCard title="Stages en cours" value={stages.length} />
           <StatCard title="Stagiaires actifs" value={stagiaires.length} />
           <StatCard title="Réunions à venir" value={reunions.length} />
         </div>
 
+        {/* TIMELINE DES STAGES */}
         <h2 className="section-title">Tableau de bord</h2>
         <div className="timeline-list">
           {stages.map((s) => (
@@ -64,6 +65,7 @@ function AccueilPage() {
           ))}
         </div>
 
+        {/* LISTE DES STAGIAIRES */}
         <h2 className="section-title">Stagiaires</h2>
         <div className="stagiaire-grid">
           {stagiaires.map((st) => (
