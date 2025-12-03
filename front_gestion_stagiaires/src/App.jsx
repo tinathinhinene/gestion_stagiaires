@@ -6,23 +6,24 @@ import LoginPage from "./pages/LoginPage";
 import AccueilPage from "./pages/AccueilPage";
 
 import StagiairesPage from "./pages/StagiairesPage";
-import StagiaireForm from "./pages/StagiaireForm";
-import StagiaireProfil from "./pages/StagiaireProfil";
+import StagiaireForm from "./forms/StagiaireForm";
+import StagiaireProfil from "./profils/StagiaireProfil";
 
 import FormateursPage from "./pages/FormateursPage";
-import FormateurForm from "./pages/FormateurForm";
+import FormateurForm from "./forms/FormateurForm";
+import FormateurProfil from "./profils/FormateurProfil";
 
 import StagesPage from "./pages/StagesPage";
-import StageForm from "./pages/StageForm";
+import StageForm from "./forms/StageForm";
 
 import ProjetsPage from "./pages/ProjetsPage";
-import ProjetForm from "./pages/ProjetForm";
+import ProjetForm from "./forms/ProjetForm";
 
 import DocumentsPage from "./pages/DocumentsPage";
-import DocumentForm from "./pages/DocumentForm";
+import DocumentForm from "./forms/DocumentForm";
 
-import ReunionPage from "./pages/ReunionPage";
-import ReunionForm from "./pages/ReunionForm";
+import ReunionPage from "./pages/ReunionsPage";
+import ReunionForm from "./forms/ReunionForm";
 
 import SearchPage from "./pages/SearchPage";
 
@@ -48,6 +49,7 @@ function App() {
         <Route path="/formateurs" element={<FormateursPage />} />
         <Route path="/formateurs/ajouter" element={<FormateurForm />} />
         <Route path="/formateurs/modifier/:id" element={<FormateurForm />} />
+        <Route path="/formateurs/:id" element={<FormateurProfil />} />
 
         {/* Stages */}
         <Route path="/stages" element={<StagesPage />} />

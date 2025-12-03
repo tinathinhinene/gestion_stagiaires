@@ -1,3 +1,4 @@
+// src/pages/FormateursPage.jsx
 import { useEffect, useState } from "react";
 import api from "../api/axiosClient";
 import { useNavigate } from "react-router-dom";
@@ -27,8 +28,8 @@ function FormateursPage() {
       await api.delete(`/formateurs/${id}`);
       setFormateurs((prev) => prev.filter((f) => f.id !== id));
     } catch (err) {
-      console.error("Erreur suppression :", err);
-      alert("Impossible de supprimer");
+      console.error("Erreur suppression formateur :", err);
+      alert("Suppression impossible");
     }
   };
 
@@ -36,16 +37,21 @@ function FormateursPage() {
     <div className="page-container">
       <h1>Formateurs</h1>
 
+      {/* Bouton Ajouter */}
       <div className="add-container">
-        <button className="add-btn" onClick={() => navigate("/formateurs/ajouter")}>
+        <button
+          className="add-btn"
+          onClick={() => navigate("/formateurs/ajouter")}
+        >
           ➕ Ajouter un formateur
         </button>
       </div>
 
-      <table className="formateur-table">
+      {/* TABLEAU */}
+      <table className="formateurs-table">
         <thead>
           <tr>
-            <th>Nom</th>
+            <th>Nom du formateur</th>
             <th>Email</th>
             <th>Téléphone</th>
             <th>Actions</th>
@@ -55,7 +61,19 @@ function FormateursPage() {
         <tbody>
           {formateurs.map((f) => (
             <tr key={f.id}>
-              <td>{f.prenom} {f.nom}</td>
+              
+              {/* 🔥 Clic sur le NOM = ouvre le PROFIL */}
+              <td
+                style={{
+                  cursor: "pointer",
+                  color: "#1193c2",
+                  fontWeight: "600"
+                }}
+                onClick={() => navigate(`/formateurs/${f.id}`)}
+              >
+                {f.prenom} {f.nom}
+              </td>
+
               <td>{f.email}</td>
               <td>{f.tel || "—"}</td>
 
@@ -74,6 +92,7 @@ function FormateursPage() {
                   Supprimer
                 </button>
               </td>
+
             </tr>
           ))}
         </tbody>
