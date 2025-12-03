@@ -1,45 +1,102 @@
-.navbar {
+/* BANDE BLEUE */
+.nav-header {
   width: 100%;
-  height: 60px;
   background: #1193c2;
+  border-bottom: 3px solid #0d6d8b;
+}
+
+/* ZONE INTERNE */
+.nav-inner {
+  max-width: 1400px;
+  height: 80px;
+  margin: 0 auto;
   display: flex;
-  justify-content: space-between;
   align-items: center;
+  justify-content: space-between;
   padding: 0 25px;
-  color: white;
 }
 
-.navbar-left .navbar-logo {
-  font-size: 20px;
-  font-weight: bold;
+/* LOGO */
+.nav-left {
+  display: flex;
+  align-items: center;
 }
 
-.navbar-center {
+.nav-logo-img {
+  height: 60px;
+  object-fit: contain;
+}
+
+/* MENU */
+.nav-center {
   display: flex;
   gap: 30px;
 }
 
-.navbar-center a {
+.nav-link {
   color: white;
+  font-size: 17px;
+  font-weight: 600;
   text-decoration: none;
-  font-size: 16px;
-  transition: 0.2s;
+  padding-bottom: 4px;
+  border-bottom: 3px solid transparent;
+  transition: 0.25s;
 }
 
-.navbar-center a:hover {
-  text-decoration: underline;
+.nav-link:hover {
+  border-bottom: 3px solid #ffffff;
 }
 
-.navbar-right .logout-btn {
-  background: #ff5f5f;
+/* DROITE : RECHERCHE + PROFIL */
+.nav-right {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+/* BARRE DE RECHERCHE */
+.nav-search {
+  position: relative;
+}
+
+.nav-search-input {
+  width: 200px;
+  padding: 8px 35px 8px 12px;
+  border-radius: 20px;
   border: none;
-  color: white;
-  padding: 8px 15px;
-  border-radius: 6px;
-  cursor: pointer;
-  transition: 0.2s;
+  outline: none;
+  font-size: 15px;
 }
 
-.navbar-right .logout-btn:hover {
-  background: #e63333;
+.nav-search-icon {
+  width: 18px;
+  height: 18px;
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+/* UTILISATEUR */
+.nav-user {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.nav-avatar {
+  background: white;
+  color: #1193c2;
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.nav-user-info {
+  color: white;
+  font-size: 15px;
+  font-weight: 600;
 }
