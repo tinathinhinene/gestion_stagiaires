@@ -12,10 +12,10 @@ function StagiaireProfil() {
   const [commentaires, setCommentaires] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  // ==============================================
-  // 1. Chargement stagiaire + tous les projets
-  //    (puis filtrage côté FRONT)
-  // ==============================================
+  // ==============================
+  // Chargement stagiaire + projet
+  // + commentaires (front only)
+  // ==============================
   useEffect(() => {
     const token = localStorage.getItem("token");
     const headers = {
@@ -37,7 +37,7 @@ function StagiaireProfil() {
         });
         const projData = await projRes.json();
 
-        // 3) Projet de ce stagiaire (via stage.stagiaire.id)
+        // Projet lié à ce stagiaire (via stage.stagiaire.id)
         const projetDuStagiaire =
           projData.find(
             (p) =>
@@ -49,21 +49,22 @@ function StagiaireProfil() {
         setStagiaire(stagData);
         setProjet(projetDuStagiaire);
 
-        // 4) Charger les commentaires du projet s’il existe
+        // 3) Commentaires (on prend tous, on filtre coté front)
         if (projetDuStagiaire) {
-          try {
-            const comRes = await fetch(
-              `http://localhost:8021/api/commentaires/projet/${projetDuStagiaire.id}`,
-              { headers }
+          const comRes = await fetch(
+            "http://localhost:8021/api/commentaires",
+            { headers }
+          );
+
+          if (comRes.ok) {
+            const allComments = await comRes.json();
+            const commentsForProject = allComments.filter(
+              (c) =>
+                c.projet &&
+                String(c.projet.id) === String(projetDuStagiaire.id)
             );
-            if (comRes.ok) {
-              const comData = await comRes.json();
-              setCommentaires(comData || []);
-            } else {
-              setCommentaires([]);
-            }
-          } catch (e) {
-            console.error("Erreur chargement commentaires :", e);
+            setCommentaires(commentsForProject);
+          } else {
             setCommentaires([]);
           }
         } else {
@@ -80,26 +81,28 @@ function StagiaireProfil() {
   }, [id]);
 
   if (loading) return <div className="profil-container">Chargement...</div>;
-  if (!stagiaire) return <div className="profil-container">Stagiaire introuvable.</div>;
+  if (!stagiaire)
+    return <div className="profil-container">Stagiaire introuvable.</div>;
 
-  // ==============================================
-  // 2. Centre & Classe – on essaye plusieurs chemins
-  // ==============================================
-  const centre =
-    stagiaire.centre?.nom ||
-    stagiaire.centre?.nomCentre ||
-    stagiaire.centre?.libelle ||
-    "—";
-
+  // ==============================
+  // Centre & Classe
+  // centre = stagiaire.classe.centre.nom
+  // classe = stagiaire.classe.nom
+  // ==============================
   const classe =
     stagiaire.classe?.nom ||
     stagiaire.classe?.nomClasse ||
-    stagiaire.classe?.libelle ||
     "—";
 
-  // ==============================================
-  // 3. Avancement du projet pour le camembert
-  // ==============================================
+  const centre =
+    stagiaire.classe?.centre?.nom ||
+    stagiaire.classe?.centre?.nomCentre ||
+    stagiaire.centre?.nom ||
+    "—";
+
+  // ==============================
+  // Avancement pour camembert
+  // ==============================
   const avancement = projet?.avancement ?? 0;
   const avancementSafe =
     typeof avancement === "number" && !Number.isNaN(avancement)
@@ -112,9 +115,9 @@ function StagiaireProfil() {
     }deg 360deg)`,
   };
 
-  // ==============================================
-  // 4. Suppression projet (front → API déjà existante)
-  // ==============================================
+  // ==============================
+  // Suppression du projet
+  // ==============================
   const handleDeleteProjet = async () => {
     if (!projet) return;
     if (!window.confirm("Supprimer ce projet ?")) return;
@@ -135,11 +138,33 @@ function StagiaireProfil() {
     }
   };
 
+  // ==============================
+  // Suppression commentaire
+  // ==============================
+  const handleDeleteComment = async (commentId) => {
+    if (!window.confirm("Supprimer ce commentaire ?")) return;
+
+    try {
+      const token = localStorage.getItem("token");
+      await fetch(`http://localhost:8021/api/commentaires/${commentId}`, {
+        method: "DELETE",
+        headers: {
+          Authorization: token ? `Bearer ${token}` : "",
+        },
+      });
+
+      setCommentaires((prev) => prev.filter((c) => c.id !== commentId));
+    } catch (err) {
+      console.error("Erreur suppression commentaire :", err);
+      alert("Impossible de supprimer le commentaire.");
+    }
+  };
+
   return (
     <div className="profil-container">
-      {/* =================================== */}
-      {/* ENTÊTE STAGIAIRE                    */}
-      {/* =================================== */}
+      {/* ========================== */}
+      {/* ENTÊTE STAGIAIRE          */}
+      {/* ========================== */}
       <h1 className="profil-title">
         Stagiaire : {stagiaire.prenom} {stagiaire.nom}
       </h1>
@@ -153,7 +178,7 @@ function StagiaireProfil() {
           />
         </div>
 
-        {/* INFORMATIONS */}
+        {/* INFOS */}
         <div className="profil-info">
           <p>
             <strong>Prénom :</strong> {stagiaire.prenom}
@@ -185,17 +210,27 @@ function StagiaireProfil() {
         </div>
       </div>
 
-      {/* =================================== */}
-      {/* PROJET DU STAGIAIRE                */}
-      {/* =================================== */}
+      {/* ========================== */}
+      {/* PROJET DU STAGIAIRE       */}
+      {/* ========================== */}
       <section className="projet-section">
         <h2>Projet du stagiaire</h2>
 
         {!projet ? (
-          <p>Aucun projet associé à ce stagiaire.</p>
+          <>
+            <p>Aucun projet associé à ce stagiaire.</p>
+            <button
+              className="btn-add"
+              onClick={() =>
+                navigate(`/projets/ajouter?stagiaire=${id}`)
+              }
+            >
+              ➕ Ajouter un projet
+            </button>
+          </>
         ) : (
           <div className="projet-layout">
-            {/* Bloc texte projet */}
+            {/* Détail projet */}
             <div className="projet-details">
               <h3 className="projet-title">{projet.titre}</h3>
 
@@ -214,7 +249,7 @@ function StagiaireProfil() {
               <div className="projet-buttons">
                 <button
                   className="btn-edit"
-                  onClick={() => navigate(`/projets/modifier/${projet.id}`)}
+                  onClick={() => navigate(`/projets/modifier/${projet.id}?stagiaire=${id}`)}
                 >
                   Modifier
                 </button>
@@ -227,7 +262,7 @@ function StagiaireProfil() {
               </div>
             </div>
 
-            {/* Camembert d’avancement */}
+            {/* Camembert */}
             <div className="projet-progress-wrapper">
               <div className="projet-progress-circle" style={progressStyle}>
                 <div className="projet-progress-inner">
@@ -240,13 +275,26 @@ function StagiaireProfil() {
         )}
       </section>
 
-      {/* =================================== */}
-      {/* COMMENTAIRES DU PROJET             */}
-      {/* =================================== */}
+      {/* ========================== */}
+      {/* COMMENTAIRES              */}
+      {/* ========================== */}
       <section className="commentaires-section">
         <h2>Commentaires du projet</h2>
 
         {!projet && <p>Aucun projet → aucun commentaire.</p>}
+
+        {projet && (
+          <button
+            className="btn-add"
+            onClick={() =>
+              navigate(
+                `/commentaires/ajouter?projet=${projet.id}&retour=/stagiaires/${id}`
+              )
+            }
+          >
+            ➕ Ajouter un commentaire
+          </button>
+        )}
 
         {projet && commentaires.length === 0 && (
           <p>Aucun commentaire pour ce projet.</p>
@@ -257,21 +305,46 @@ function StagiaireProfil() {
             {commentaires.map((c) => (
               <li key={c.id} className="commentaire-item">
                 <div className="comment-header">
-                  <strong>{c.auteur || "Formateur"}</strong>
+                  <strong>
+                    {c.formateur
+                      ? `${c.formateur.prenom} ${c.formateur.nom}`
+                      : "Formateur"}
+                  </strong>
                   <span className="comment-date">
-                    {c.dateCommentaire || ""}
+                    {c.date
+                      ? new Date(c.date).toLocaleString("fr-FR")
+                      : ""}
                   </span>
                 </div>
-                <p className="comment-text">{c.texte || c.contenu}</p>
+                <p className="comment-text">{c.message}</p>
+
+                <div className="comment-buttons">
+                  <button
+                    className="btn-edit"
+                    onClick={() =>
+                      navigate(
+                        `/commentaires/modifier/${c.id}?retour=/stagiaires/${id}`
+                      )
+                    }
+                  >
+                    Modifier
+                  </button>
+                  <button
+                    className="btn-delete"
+                    onClick={() => handleDeleteComment(c.id)}
+                  >
+                    Supprimer
+                  </button>
+                </div>
               </li>
             ))}
           </ul>
         )}
       </section>
 
-      {/* =================================== */}
-      {/* BOUTONS BAS DE PAGE                */}
-      {/* =================================== */}
+      {/* ========================== */}
+      {/* BOUTONS BAS DE PAGE       */}
+      {/* ========================== */}
       <div className="profil-buttons">
         <button
           className="edit-button"

@@ -15,6 +15,7 @@ import FormateurForm from "./forms/FormateurForm";
 import FormateurProfil from "./profils/FormateurProfil";
 
 import ProjetForm from "./forms/ProjetForm";
+import CommentaireForm from "./forms/CommentaireForm";
 
 import DocumentsPage from "./pages/DocumentsPage";
 import DocumentForm from "./forms/DocumentForm";
@@ -49,8 +50,18 @@ function App() {
         <Route path="/formateurs/:id" element={<FormateurProfil />} />
 
         {/* Projets */}
-        <Route path="/projets/ajouter" element={<ProjetForm />} />
-        <Route path="/projets/modifier/:id" element={<ProjetForm />} />
+        <Route path="/projets/ajouter" element={<ProjetForm mode="add" />} />
+        <Route path="/projets/modifier/:id" element={<ProjetForm mode="edit" />} />
+
+        {/* Commentaires */}
+        <Route
+          path="/commentaires/ajouter"
+          element={<CommentaireForm mode="add" />}
+        />
+        <Route
+          path="/commentaires/modifier/:id"
+          element={<CommentaireForm mode="edit" />}
+        />
 
         {/* Documents */}
         <Route path="/documents" element={<DocumentsPage />} />
