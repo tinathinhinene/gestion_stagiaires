@@ -1,81 +1,80 @@
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { Routes, Route, Navigate } from "react-router-dom";
 
+// NAVBAR
 import Navbar from "./components/Navbar";
 
+// PAGES
 import LoginPage from "./pages/LoginPage";
 import AccueilPage from "./pages/AccueilPage";
-
 import StagiairesPage from "./pages/StagiairesPage";
-import StagiaireForm from "./forms/StagiaireForm";
-import StagiaireProfil from "./profils/StagiaireProfil";
-
 import FormateursPage from "./pages/FormateursPage";
+import DocumentsPage from "./pages/DocumentsPage";
+import ReunionPage from "./pages/ReunionsPage";
+import SearchPage from "./pages/SearchPage";
+
+// FORMS
+import StagiaireForm from "./forms/StagiaireForm";
 import FormateurForm from "./forms/FormateurForm";
-import FormateurProfil from "./profils/FormateurProfil";
-
-import StagesPage from "./pages/StagesPage";
-import StageForm from "./forms/StageForm";
-
-import ProjetsPage from "./pages/ProjetsPage";
+import StageForm from "./forms/StageForm";         // 👉 Garde ce fichier : il sert pour créer un stage depuis le stagiaire
+import DocumentForm from "./forms/DocumentForm";
+import ReunionForm from "./forms/ReunionForm";
 import ProjetForm from "./forms/ProjetForm";
 
-import DocumentsPage from "./pages/DocumentsPage";
-import DocumentForm from "./forms/DocumentForm";
-
-import ReunionPage from "./pages/ReunionsPage";
-import ReunionForm from "./forms/ReunionForm";
-
-import SearchPage from "./pages/SearchPage";
+// PROFILS
+import StagiaireProfil from "./profils/StagiaireProfil";
+import FormateurProfil from "./profils/FormateurProfil";
 
 function App() {
   return (
-    <BrowserRouter>
+    <>
       <Navbar />
 
       <Routes>
+        {/* Redirection route racine */}
+        <Route path="/" element={<Navigate to="/accueil" />} />
+
         {/* Auth */}
         <Route path="/login" element={<LoginPage />} />
 
         {/* Accueil */}
         <Route path="/accueil" element={<AccueilPage />} />
 
-        {/* Stagiaires */}
+        {/* ====================== STAGIAIRES ====================== */}
         <Route path="/stagiaires" element={<StagiairesPage />} />
         <Route path="/stagiaires/ajouter" element={<StagiaireForm />} />
         <Route path="/stagiaires/modifier/:id" element={<StagiaireForm />} />
         <Route path="/stagiaires/:id" element={<StagiaireProfil />} />
 
-        {/* Formateurs */}
+        {/* ====================== FORMATEURS ====================== */}
         <Route path="/formateurs" element={<FormateursPage />} />
         <Route path="/formateurs/ajouter" element={<FormateurForm />} />
         <Route path="/formateurs/modifier/:id" element={<FormateurForm />} />
         <Route path="/formateurs/:id" element={<FormateurProfil />} />
 
-        {/* Stages */}
-        <Route path="/stages" element={<StagesPage />} />
+        {/* ====================== STAGES (FORM ONLY) =============== */}
+        {/* Pas de StagesPage → on garde le formulaire */}
         <Route path="/stages/ajouter" element={<StageForm />} />
         <Route path="/stages/modifier/:id" element={<StageForm />} />
 
-        {/* Projets */}
-        <Route path="/projets" element={<ProjetsPage />} />
+        {/* ====================== PROJETS (FORM ONLY) ============== */}
         <Route path="/projets/ajouter" element={<ProjetForm />} />
         <Route path="/projets/modifier/:id" element={<ProjetForm />} />
 
-        {/* Documents */}
+        {/* ====================== DOCUMENTS ========================= */}
         <Route path="/documents" element={<DocumentsPage />} />
         <Route path="/documents/ajouter" element={<DocumentForm />} />
 
-        {/* Réunions */}
+        {/* ====================== RÉUNIONS ========================== */}
         <Route path="/reunions" element={<ReunionPage />} />
         <Route path="/reunions/ajouter" element={<ReunionForm />} />
 
-        {/* Recherche */}
+        {/* ====================== RECHERCHE ========================= */}
         <Route path="/recherche" element={<SearchPage />} />
 
         {/* Default */}
         <Route path="*" element={<AccueilPage />} />
       </Routes>
-    </BrowserRouter>
+    </>
   );
 }
 

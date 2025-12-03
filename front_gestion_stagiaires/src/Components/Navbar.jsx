@@ -23,8 +23,6 @@ function Navbar() {
         <nav className="nav-center">
           <Link to="/stagiaires" className="nav-link">Stagiaires</Link>
           <Link to="/accueil" className="nav-link">Tableau de bord</Link>
-          <Link to="/projets" className="nav-link">Projets</Link>
-          <Link to="/stages" className="nav-link">Stages</Link>
           <Link to="/documents" className="nav-link">Documents</Link>
           <Link to="/reunions" className="nav-link">Réunions</Link>
         </nav>

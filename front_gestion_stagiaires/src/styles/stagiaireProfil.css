@@ -61,3 +61,47 @@
 .back-button:hover {
   background: #ccc;
 }
+.table-projets {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 20px;
+  font-size: 16px;
+}
+
+.table-projets th, .table-projets td {
+  border: 1px solid #c7e2ed;
+  padding: 10px;
+}
+
+.table-projets th {
+  background: #e7f7ff;
+  font-weight: 700;
+}
+
+.btn-add {
+  background: #1193c2;
+  color: white;
+  padding: 8px 14px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  margin-bottom: 10px;
+}
+
+.btn-edit {
+  background: #7ad3ff;
+  border: none;
+  padding: 6px 10px;
+  margin-right: 5px;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.btn-delete {
+  background: #ff8b8b;
+  border: none;
+  padding: 6px 10px;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
