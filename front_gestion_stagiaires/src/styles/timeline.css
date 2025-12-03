@@ -1,0 +1,82 @@
+.timeline-wrapper {
+  margin-top: 30px;
+}
+
+.timeline-year-controls {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 15px;
+  margin-bottom: 20px;
+}
+
+.timeline-year-controls button {
+  padding: 6px 12px;
+  border: 1px solid #b7d7e5;
+  background: #e8f6fa;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 16px;
+}
+
+.timeline-months {
+  display: grid;
+  grid-template-columns: repeat(12, 1fr);
+  margin-bottom: 15px;
+  padding: 0 30px;
+  color: #425b67;
+  font-weight: 500;
+}
+
+.timeline-month {
+  text-align: center;
+}
+
+.timeline-list {
+  margin-top: 10px;
+}
+
+.timeline-row {
+  display: grid;
+  grid-template-columns: 150px 1fr;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.timeline-name {
+  text-align: right;
+  padding-right: 15px;
+  font-weight: 500;
+  color: #2a4b57;
+}
+
+.timeline-bar {
+  background: #e5eff2;
+  height: 10px;
+  position: relative;
+  border-radius: 5px;
+  overflow: visible;
+}
+
+.timeline-fill {
+  position: absolute;
+  top: 0;
+  height: 100%;
+  background: #7dd8a0;
+  border-radius: 5px;
+}
+
+.timeline-dates {
+  position: absolute;
+  top: -20px;
+  font-size: 11px;
+  color: #2b4f59;
+  white-space: nowrap;
+}
+
+.no-stage {
+  text-align: center;
+  margin-top: 30px;
+  color: #888;
+  font-size: 16px;
+}

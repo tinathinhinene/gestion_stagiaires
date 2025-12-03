@@ -74,29 +74,23 @@ public class StagiaireService {
     }
 
     // ============================================================
-    // CREATE
+    // CREATE (OPTION 1)
+    // Automatique : Formateur = formateur connecté
+    // Classe = par défaut ID = 1 (à adapter)
     // ============================================================
     public Stagiaire create(StagiaireInput req) {
 
         Utilisateur u = getCurrentUser();
 
-        if (req.getFormateur() == null || req.getFormateur().getId() == null)
-            throw new RessourceAccessDeniedException("Formateur obligatoire");
+        // Le formateur connecté
+        Formateur formateur = u.getFormateur();
 
-        if (req.getClasse() == null || req.getClasse().getId() == null)
-            throw new RessourceAccessDeniedException("Classe obligatoire");
+        if (formateur == null)
+            throw new RessourceAccessDeniedException("Un formateur doit être connecté");
 
-        Formateur formateur = formateurRepo.findById(req.getFormateur().getId())
-                .orElseThrow(() -> new RessourceAccessDeniedException("Formateur introuvable"));
-
-        Classe classe = classeRepo.findById(req.getClasse().getId())
-                .orElseThrow(() -> new RessourceAccessDeniedException("Classe introuvable"));
-
-        // FORMATEUR → peut créer seulement ses stagiaires
-        if (u.getRole() == RoleUtilisateur.formateur &&
-           !formateur.getId().equals(u.getFormateur().getId())) {
-            throw new RessourceAccessDeniedException("Ce formateur ne vous appartient pas");
-        }
+        // Classe par défaut
+        Classe classe = classeRepo.findById(1)
+                .orElseThrow(() -> new RessourceAccessDeniedException("Classe par défaut introuvable"));
 
         Stagiaire s = new Stagiaire();
         s.setNom(req.getNom());
@@ -105,6 +99,7 @@ public class StagiaireService {
         s.setTel(req.getTel());
         s.setDateNaiss(req.getDateNaiss());
         s.setActif(req.getActif());
+
         s.setFormateur(formateur);
         s.setClasse(classe);
 
@@ -121,33 +116,10 @@ public class StagiaireService {
         Stagiaire s = repo.findById(id)
                 .orElseThrow(() -> new RessourceAccessDeniedException("Stagiaire introuvable"));
 
-        // FORMATEUR ne peut modifier que ses stagiaires
+        // Le formateur ne peut modifier que ses stagiaires
         if (u.getRole() == RoleUtilisateur.formateur &&
-           !s.getFormateur().getId().equals(u.getFormateur().getId())) {
+            !s.getFormateur().getId().equals(u.getFormateur().getId())) {
             throw new RessourceAccessDeniedException("Modification interdite");
-        }
-
-        // modification du formateur (admin uniquement)
-        if (req.getFormateur() != null && req.getFormateur().getId() != null) {
-
-            Formateur f = formateurRepo.findById(req.getFormateur().getId())
-                    .orElseThrow(() -> new RessourceAccessDeniedException("Formateur introuvable"));
-
-            if (u.getRole() == RoleUtilisateur.formateur &&
-                !f.getId().equals(u.getFormateur().getId())) {
-                throw new RessourceAccessDeniedException("Vous ne pouvez pas changer le formateur");
-            }
-
-            s.setFormateur(f);
-        }
-
-        // modification de la classe
-        if (req.getClasse() != null && req.getClasse().getId() != null) {
-
-            Classe c = classeRepo.findById(req.getClasse().getId())
-                    .orElseThrow(() -> new RessourceAccessDeniedException("Classe introuvable"));
-
-            s.setClasse(c);
         }
 
         s.setNom(req.getNom());
@@ -159,24 +131,40 @@ public class StagiaireService {
 
         return repo.save(s);
     }
+ // src/main/java/com/gestion/service/StagiaireService.java
 
-    // ============================================================
-    // DELETE
-    // ============================================================
-    public void delete(Integer id) {
-        Utilisateur u = getCurrentUser();
+ // ...
 
-        Stagiaire s = repo.findById(id)
-                .orElseThrow(() -> new RessourceAccessDeniedException("Stagiaire introuvable"));
+ // ============================================================
+ // DELETE
+ // ============================================================
+ public void delete(Integer id) {
+     Utilisateur u = getCurrentUser();
 
-        if (u.getRole() == RoleUtilisateur.admin ||
-           (u.getRole() == RoleUtilisateur.formateur &&
-            s.getFormateur().getId().equals(u.getFormateur().getId()))) {
+     Stagiaire s = repo.findById(id)
+             .orElseThrow(() -> new RessourceAccessDeniedException("Stagiaire introuvable"));
 
-            repo.deleteById(id);
-            return;
-        }
+     // ADMIN : peut tout supprimer
+     if (u.getRole() == RoleUtilisateur.admin) {
+         repo.deleteById(id);
+         return;
+     }
 
-        throw new RessourceAccessDeniedException("Suppression interdite");
-    }
+     // FORMATEUR : ne peut supprimer que ses stagiaires
+     if (u.getRole() == RoleUtilisateur.formateur) {
+         if (s.getFormateur() != null
+                 && s.getFormateur().getId() != null
+                 && s.getFormateur().getId().equals(u.getFormateur().getId())) {
+
+             repo.deleteById(id);
+             return;
+         }
+
+         throw new RessourceAccessDeniedException("Suppression interdite (stagiaire d'un autre formateur)");
+     }
+
+     // Tous les autres rôles : interdit
+     throw new RessourceAccessDeniedException("Suppression interdite");
+ }
 }
+ 

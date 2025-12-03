@@ -1,0 +1,52 @@
+.carousel-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: 40px;
+  gap: 15px;
+}
+
+.carousel-btn {
+  width: 40px;
+  height: 40px;
+  background: #1193c2;
+  color: white;
+  border: none;
+  border-radius: 50%;
+  cursor: pointer;
+  transition: 0.2s;
+  font-size: 22px;
+}
+
+.carousel-btn:hover {
+  background: #0d7ca3;
+}
+
+.carousel-track {
+  display: flex;
+  gap: 35px;
+}
+
+.bubble-container {
+  text-align: center;
+  cursor: pointer;
+}
+
+.bubble-img {
+  width: 110px;
+  height: 110px;
+  border-radius: 50%;
+  border: 4px solid #1193c2;
+  object-fit: cover;
+}
+
+.bubble-name {
+  font-size: 15px;
+  font-weight: bold;
+  margin-top: 8px;
+}
+
+.bubble-lastname {
+  font-size: 13px;
+  color: #444;
+}

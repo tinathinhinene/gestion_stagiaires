@@ -1,66 +1,79 @@
-import { Routes, Route, Navigate, useLocation } from "react-router-dom";
-import Navbar from "./components/Navbar.jsx";
-import PrivateRoute from "./components/PrivateRoute.jsx";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
 
-import LoginPage from "./pages/LoginPage.jsx";
-import AccueilPage from "./pages/AccueilPage.jsx";
-import StagiairesPage from "./pages/StagiairesPage.jsx";
-import ProjetPage from "./pages/ProjetPage.jsx";
-import StagePage from "./pages/StagePage.jsx";
-import DocumentPage from "./pages/DocumentPage.jsx";
-import ReunionPage from "./pages/ReunionPage.jsx";
-import SearchPage from "./pages/SearchPage.jsx";
+import Navbar from "./components/Navbar";
+
+import LoginPage from "./pages/LoginPage";
+import AccueilPage from "./pages/AccueilPage";
+
+import StagiairesPage from "./pages/StagiairesPage";
+import StagiaireForm from "./pages/StagiaireForm";
+import StagiaireProfil from "./pages/StagiaireProfil";
+
+import FormateursPage from "./pages/FormateursPage";
+import FormateurForm from "./pages/FormateurForm";
+
+import StagesPage from "./pages/StagesPage";
+import StageForm from "./pages/StageForm";
+
+import ProjetsPage from "./pages/ProjetsPage";
+import ProjetForm from "./pages/ProjetForm";
+
+import DocumentsPage from "./pages/DocumentsPage";
+import DocumentForm from "./pages/DocumentForm";
+
+import ReunionPage from "./pages/ReunionPage";
+import ReunionForm from "./pages/ReunionForm";
+
+import SearchPage from "./pages/SearchPage";
 
 function App() {
-  const location = useLocation();
-  const hideNavbar = location.pathname === "/login";
-
   return (
-    <>
-      {!hideNavbar && <Navbar />}
+    <BrowserRouter>
+      <Navbar />
 
       <Routes>
+        {/* Auth */}
         <Route path="/login" element={<LoginPage />} />
 
-        {/* Routes protégées */}
-        <Route
-          path="/accueil"
-          element={<PrivateRoute><AccueilPage /></PrivateRoute>}
-        />
+        {/* Accueil */}
+        <Route path="/accueil" element={<AccueilPage />} />
 
-        <Route
-          path="/stagiaires"
-          element={<PrivateRoute><StagiairesPage /></PrivateRoute>}
-        />
+        {/* Stagiaires */}
+        <Route path="/stagiaires" element={<StagiairesPage />} />
+        <Route path="/stagiaires/ajouter" element={<StagiaireForm />} />
+        <Route path="/stagiaires/modifier/:id" element={<StagiaireForm />} />
+        <Route path="/stagiaires/:id" element={<StagiaireProfil />} />
 
-        <Route
-          path="/projets"
-          element={<PrivateRoute><ProjetPage /></PrivateRoute>}
-        />
+        {/* Formateurs */}
+        <Route path="/formateurs" element={<FormateursPage />} />
+        <Route path="/formateurs/ajouter" element={<FormateurForm />} />
+        <Route path="/formateurs/modifier/:id" element={<FormateurForm />} />
 
-        <Route
-          path="/stages"
-          element={<PrivateRoute><StagePage /></PrivateRoute>}
-        />
+        {/* Stages */}
+        <Route path="/stages" element={<StagesPage />} />
+        <Route path="/stages/ajouter" element={<StageForm />} />
+        <Route path="/stages/modifier/:id" element={<StageForm />} />
 
-        <Route
-          path="/documents"
-          element={<PrivateRoute><DocumentPage /></PrivateRoute>}
-        />
+        {/* Projets */}
+        <Route path="/projets" element={<ProjetsPage />} />
+        <Route path="/projets/ajouter" element={<ProjetForm />} />
+        <Route path="/projets/modifier/:id" element={<ProjetForm />} />
 
-        <Route
-          path="/reunions"
-          element={<PrivateRoute><ReunionPage /></PrivateRoute>}
-        />
+        {/* Documents */}
+        <Route path="/documents" element={<DocumentsPage />} />
+        <Route path="/documents/ajouter" element={<DocumentForm />} />
 
-        <Route
-          path="/recherche"
-          element={<PrivateRoute><SearchPage /></PrivateRoute>}
-        />
+        {/* Réunions */}
+        <Route path="/reunions" element={<ReunionPage />} />
+        <Route path="/reunions/ajouter" element={<ReunionForm />} />
 
-        <Route path="*" element={<Navigate to="/accueil" replace />} />
+        {/* Recherche */}
+        <Route path="/recherche" element={<SearchPage />} />
+
+        {/* Default */}
+        <Route path="*" element={<AccueilPage />} />
       </Routes>
-    </>
+    </BrowserRouter>
   );
 }
 

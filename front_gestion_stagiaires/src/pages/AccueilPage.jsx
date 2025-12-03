@@ -3,31 +3,30 @@ import api from "../api/axiosClient";
 import { AuthContext } from "../context/AuthContext";
 
 import StatCard from "../components/StatCard";
-import TimelineBar from "../components/TimelineBar";
-import StagiaireCard from "../components/StagiaireCard";
+import Timeline from "../components/Timeline";
 
 import "../styles/accueil.css";
+import "../styles/timeline.css";
 
 function AccueilPage() {
-  const { user } = useContext(AuthContext); // qui est connecté (admin / formateur)
+  const { user } = useContext(AuthContext);
 
-  const [role, setRole] = useState(null);
   const [stagiaires, setStagiaires] = useState([]);
   const [stages, setStages] = useState([]);
   const [reunions, setReunions] = useState([]);
 
-  // 🟦 Quand l'utilisateur est connu → on charge les données
+  // Année affichée dans le Gantt
+  const [year, setYear] = useState(2025);
+
   useEffect(() => {
     if (!user) return;
-
-    setRole(user.role);
     loadData();
   }, [user]);
 
-  // 🟩 Charge les données SANS se soucier du rôle
-  // 👉 le backend se charge de filtrer en fonction du token
   const loadData = async () => {
     try {
+      // ✅ TON BACK GÈRE DÉJÀ LES DROITS (admin/formateur)
+      // donc on ne refiltre PLUS côté front
       const [resStagiaires, resStages, resReunions] = await Promise.all([
         api.get("/stagiaires"),
         api.get("/stages"),
@@ -38,45 +37,41 @@ function AccueilPage() {
       setStages(resStages.data);
       setReunions(resReunions.data);
     } catch (err) {
-      console.error("Erreur lors du chargement des données :", err);
+      console.error("Erreur chargement :", err);
     }
   };
+
+  // 🔥 Filtrage PRO pour l’année (stages multi-années OK)
+  const stagesFiltered = stages.filter((s) => {
+    const d1 = new Date(s.dateDebut);
+    const d2 = new Date(s.dateFin);
+
+    // Début et fin de l'année affichée
+    const startYear = new Date(year, 0, 1);
+    const endYear = new Date(year, 11, 31, 23, 59, 59);
+
+    // Le stage est affiché s'il coupe l'année
+    return d2 >= startYear && d1 <= endYear;
+  });
 
   return (
     <div className="accueil-wrapper">
       <div className="accueil-container">
-        {/* CARTES DE STATS */}
+        {/* STATISTIQUES */}
         <div className="stats-box">
           <StatCard title="Stages en cours" value={stages.length} />
           <StatCard title="Stagiaires actifs" value={stagiaires.length} />
           <StatCard title="Réunions à venir" value={reunions.length} />
         </div>
 
-        {/* TIMELINE DES STAGES */}
         <h2 className="section-title">Tableau de bord</h2>
-        <div className="timeline-list">
-          {stages.map((s) => (
-            <TimelineBar
-              key={s.id}
-              nom={`${s.stagiaire.prenom} ${s.stagiaire.nom}`}
-              debut={s.dateDebut}
-              fin={s.dateFin}
-            />
-          ))}
-        </div>
 
-        {/* LISTE DES STAGIAIRES */}
-        <h2 className="section-title">Stagiaires</h2>
-        <div className="stagiaire-grid">
-          {stagiaires.map((st) => (
-            <StagiaireCard
-              key={st.id}
-              nom={st.nom}
-              prenom={st.prenom}
-              photo={st.photo}
-            />
-          ))}
-        </div>
+        {/* TIMELINE GANTT */}
+        <Timeline
+          year={year}
+          setYear={setYear}
+          stages={stagesFiltered}
+        />
       </div>
     </div>
   );
