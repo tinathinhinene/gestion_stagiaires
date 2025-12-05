@@ -1,12 +1,13 @@
+// src/forms/ReunionForm.jsx
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import api from "../api/axiosClient";
+import "../styles/reunionForm.css";
 
 function ReunionForm({ mode }) {
   const navigate = useNavigate();
   const { id } = useParams();
 
-  const [formateurs, setFormateurs] = useState([]);
   const [stagiaires, setStagiaires] = useState([]);
   const [projets, setProjets] = useState([]);
 
@@ -15,174 +16,193 @@ function ReunionForm({ mode }) {
     duree: "",
     objet: "",
     description: "",
-    type: "BILAN",
+    type: "initiale",
     actions: "",
-    etat: "PLANIFIEE",
-    formateur: { id: "" },
+    etat: "plannifiee",
     stagiaire: { id: "" },
-    projet: { id: "" }
+    projet: { id: "" },
   });
 
-  const fetchLists = async () => {
-    const f = await api.get("/formateurs");
-    const s = await api.get("/stagiaires");
-    const p = await api.get("/projets");
+  const fetchData = async () => {
+    try {
+      const [s, p] = await Promise.all([
+        api.get("/stagiaires"),
+        api.get("/projets"),
+      ]);
 
-    setFormateurs(f.data);
-    setStagiaires(s.data);
-    setProjets(p.data);
+      setStagiaires(s.data);
+      setProjets(p.data);
+
+      if (mode === "edit") {
+        const r = await api.get(`/reunions/${id}`);
+        setForm({
+          date: r.data.date,
+          duree: r.data.duree,
+          objet: r.data.objet,
+          description: r.data.description,
+          type: r.data.type,
+          actions: r.data.actions,
+          etat: r.data.etat,
+          stagiaire: { id: r.data.stagiaire?.id || "" },
+          projet: { id: r.data.projet?.id || "" },
+        });
+      }
+    } catch (err) {
+      console.error(err);
+      alert("Erreur lors du chargement des données");
+    }
   };
 
   useEffect(() => {
-    fetchLists();
+    fetchData();
+  }, []);
 
-    if (mode === "edit") {
-      api.get(`/reunions/${id}`).then((res) => {
-        const r = res.data;
-
-        setForm({
-          date: r.date,
-          duree: r.duree,
-          objet: r.objet,
-          description: r.description,
-          type: r.type,
-          actions: r.actions,
-          etat: r.etat,
-          formateur: { id: r.formateur?.id || "" },
-          stagiaire: { id: r.stagiaire?.id || "" },
-          projet: { id: r.projet?.id || "" }
-        });
-      });
-    }
-  }, [id, mode]);
+  // Formateur automatique = user connecté
+  const getConnectedFormateur = () => {
+    const tokenData = JSON.parse(localStorage.getItem("user"));
+    return { id: tokenData?.formateur?.id || null };
+  };
 
   const onChange = (e) =>
     setForm({ ...form, [e.target.name]: e.target.value });
 
-  const onSelect = (e, field) =>
-    setForm({ ...form, [field]: { id: e.target.value } });
+  const onSelect = (e, key) =>
+    setForm({ ...form, [key]: { id: e.target.value } });
 
-  const submitForm = async (e) => {
+  const submit = async (e) => {
     e.preventDefault();
+
+    const payload = {
+      ...form,
+      formateur: getConnectedFormateur(),
+    };
 
     try {
       if (mode === "add") {
-        await api.post("/reunions/create", form);
+        await api.post("/reunions/create", payload);
       } else {
-        await api.put(`/reunions/${id}`, form);
+        await api.put(`/reunions/${id}`, payload);
       }
-
       navigate("/reunions");
     } catch (err) {
-      console.error(err);
-      alert("Erreur lors de l'enregistrement");
+      console.log(err);
+      alert("Erreur lors de l’enregistrement");
     }
   };
 
   return (
-    <div style={{ padding: "2rem" }}>
-      <h1>{mode === "add" ? "Nouvelle réunion" : "Modifier la réunion"}</h1>
+    <div className="reunion-form-container">
+      <h1 className="title">
+        {mode === "add" ? "Nouvelle réunion" : "Modifier la réunion"}
+      </h1>
 
-      <form onSubmit={submitForm} style={{ maxWidth: "350px" }}>
-        <label>Date</label>
-        <input
-          type="datetime-local"
-          name="date"
-          value={form.date}
-          onChange={onChange}
-          required
-        />
+      <form className="form-card" onSubmit={submit}>
+        <div className="row">
+          <div className="field">
+            <label>Date</label>
+            <input
+              type="datetime-local"
+              name="date"
+              value={form.date}
+              onChange={onChange}
+              required
+            />
+          </div>
 
-        <label>Durée (minutes)</label>
-        <input
-          type="number"
-          name="duree"
-          value={form.duree}
-          onChange={onChange}
-          required
-        />
+          <div className="field">
+            <label>Durée (minutes)</label>
+            <input
+              type="number"
+              name="duree"
+              value={form.duree}
+              onChange={onChange}
+            />
+          </div>
+        </div>
 
-        <label>Objet</label>
-        <input
-          name="objet"
-          value={form.objet}
-          onChange={onChange}
-          required
-        />
+        <div className="field">
+          <label>Objet</label>
+          <input
+            name="objet"
+            value={form.objet}
+            onChange={onChange}
+            required
+          />
+        </div>
 
-        <label>Description</label>
-        <textarea
-          name="description"
-          value={form.description}
-          onChange={onChange}
-          required
-        />
+        <div className="field">
+          <label>Description</label>
+          <textarea
+            name="description"
+            value={form.description}
+            onChange={onChange}
+            required
+          />
+        </div>
 
-        <label>Actions prévues</label>
-        <textarea
-          name="actions"
-          value={form.actions}
-          onChange={onChange}
-        />
+        <div className="field">
+          <label>Actions prévues</label>
+          <textarea
+            name="actions"
+            value={form.actions}
+            onChange={onChange}
+          />
+        </div>
 
-        <label>Type</label>
-        <select name="type" value={form.type} onChange={onChange}>
-          <option value="BILAN">BILAN</option>
-          <option value="TECHNIQUE">TECHNIQUE</option>
-          <option value="ENTRETIEN">ENTRETIEN</option>
-        </select>
+        <div className="row">
+          <div className="field">
+            <label>Type</label>
+            <select name="type" value={form.type} onChange={onChange}>
+              <option value="initiale">initiale</option>
+              <option value="suivi">suivi</option>
+              <option value="fin_stage">fin_stage</option>
+            </select>
+          </div>
 
-        <label>État</label>
-        <select name="etat" value={form.etat} onChange={onChange}>
-          <option value="PLANIFIEE">PLANIFIEE</option>
-          <option value="TERMINEE">TERMINEE</option>
-          <option value="ANNULEE">ANNULEE</option>
-        </select>
+          <div className="field">
+            <label>État</label>
+            <select name="etat" value={form.etat} onChange={onChange}>
+              <option value="plannifiee">plannifiee</option>
+              <option value="realisee">realisee</option>
+              <option value="annulee">annulee</option>
+            </select>
+          </div>
+        </div>
 
-        <label>Formateur</label>
-        <select
-          value={form.formateur.id}
-          onChange={(e) => onSelect(e, "formateur")}
-          required
-        >
-          <option value="">-- Choisir --</option>
-          {formateurs.map((f) => (
-            <option key={f.id} value={f.id}>
-              {f.prenom} {f.nom}
-            </option>
-          ))}
-        </select>
+        <div className="field">
+          <label>Stagiaire</label>
+          <select
+            value={form.stagiaire.id}
+            onChange={(e) => onSelect(e, "stagiaire")}
+            required
+          >
+            <option value="">-- Choisir un stagiaire --</option>
 
-        <label>Stagiaire</label>
-        <select
-          value={form.stagiaire.id}
-          onChange={(e) => onSelect(e, "stagiaire")}
-          required
-        >
-          <option value="">-- Choisir --</option>
-          {stagiaires.map((s) => (
-            <option key={s.id} value={s.id}>
-              {s.prenom} {s.nom}
-            </option>
-          ))}
-        </select>
+            {stagiaires.map((s) => (
+              <option value={s.id} key={s.id}>
+                {s.prenom} {s.nom}
+              </option>
+            ))}
+          </select>
+        </div>
 
-        <label>Projet</label>
-        <select
-          value={form.projet.id}
-          onChange={(e) => onSelect(e, "projet")}
-        >
-          <option value="">-- Choisir (optionnel) --</option>
-          {projets.map((p) => (
-            <option key={p.id} value={p.id}>
-              {p.titre}
-            </option>
-          ))}
-        </select>
+        <div className="field">
+          <label>Projet (facultatif)</label>
+          <select
+            value={form.projet.id}
+            onChange={(e) => onSelect(e, "projet")}
+          >
+            <option value="">-- Aucun projet --</option>
 
-        <button type="submit" style={{ marginTop: "1rem" }}>
-          Enregistrer
-        </button>
+            {projets.map((p) => (
+              <option value={p.id} key={p.id}>
+                {p.titre}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        <button className="btn-submit">Enregistrer</button>
       </form>
     </div>
   );

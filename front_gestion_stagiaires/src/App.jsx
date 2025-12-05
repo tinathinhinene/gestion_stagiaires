@@ -20,7 +20,7 @@ import CommentaireForm from "./forms/CommentaireForm";
 import DocumentsPage from "./pages/DocumentsPage";
 import DocumentForm from "./forms/DocumentForm";
 
-import ReunionPage from "./pages/ReunionsPage";
+import ReunionsPage from "./pages/ReunionsPage";
 import ReunionForm from "./forms/ReunionForm";
 
 import SearchPage from "./pages/SearchPage";
@@ -68,8 +68,12 @@ function App() {
         <Route path="/documents/ajouter" element={<DocumentForm />} />
 
         {/* Réunions */}
-        <Route path="/reunions" element={<ReunionPage />} />
-        <Route path="/reunions/ajouter" element={<ReunionForm />} />
+       {/* <Route path="/reunions" element={<ReunionPage />} />
+        <Route path="/reunions/ajouter" element={<ReunionForm />} />  */}
+<Route path="/reunions" element={<ReunionsPage />} />
+<Route path="/reunions/new" element={<ReunionForm mode="add" />} />
+<Route path="/reunions/edit/:id" element={<ReunionForm mode="edit" />} />
+
 
         {/* Recherche */}
         <Route path="/recherche" element={<SearchPage />} />

@@ -1,0 +1,61 @@
+.reunion-form-container {
+  max-width: 900px;
+  margin: auto;
+  padding: 2rem;
+}
+
+.title {
+  color: #08465D;
+  font-size: 32px;
+  margin-bottom: 20px;
+}
+
+.form-card {
+  background: #f9fcff;
+  padding: 25px;
+  border-radius: 12px;
+  box-shadow: 0 3px 12px rgba(0,0,0,0.08);
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 18px;
+}
+
+label {
+  font-weight: 600;
+  color: #204c5e;
+  margin-bottom: 6px;
+}
+
+input, select, textarea {
+  padding: 10px;
+  border-radius: 8px;
+  border: 1px solid #c9d9e1;
+  font-size: 15px;
+}
+
+textarea {
+  min-height: 80px;
+}
+
+.row {
+  display: flex;
+  gap: 20px;
+}
+
+.btn-submit {
+  background: #1193C2;
+  color: white;
+  padding: 12px 20px;
+  border-radius: 8px;
+  border: none;
+  font-size: 16px;
+  cursor: pointer;
+  margin-top: 10px;
+}
+
+.btn-submit:hover {
+  background: #0d7ea7;
+}
